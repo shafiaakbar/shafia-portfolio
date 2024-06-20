@@ -4,10 +4,11 @@ from email import policy
 from email.parser import BytesParser
 
 def parse_email_from_stdin():
-    email_message = BytesParser(policy=policy.default).parse(sys.stdin)
+    # Use sys.stdin.buffer to access the binary input stream
+    email_message = BytesParser(policy=policy.default).parse(sys.stdin.buffer)
     
-    # Extract all headers
-    headers = dict(email_message.items())
+    # Extract all headers and convert keys to lowercase
+    headers = {k.lower(): v for k, v in email_message.items()}
     
     # Initialize additional fields
     headers['legalholds_id'] = []
@@ -36,8 +37,3 @@ def parse_email_from_stdin():
 if __name__ == '__main__':
     email_data = parse_email_from_stdin()
     print(json.dumps(email_data, ensure_ascii=False, indent=4))
-
-
-
-
-
