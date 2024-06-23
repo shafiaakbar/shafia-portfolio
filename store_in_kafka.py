@@ -15,7 +15,7 @@ BUCKET_NAME = "ecompasse-mails"  # Set the correct bucket name
 PREFIX = 'emails\\'  # Set the prefix to match your S3 structure
 
 # Kafka configuration
-KAFKA_BOOTSTRAP_SERVERS = 'kafkaui.ecompasse.co:9092'
+KAFKA_BOOTSTRAP_SERVERS = 'localhost:9092'
 KAFKA_TOPIC = 'email_data'
 
 
@@ -62,6 +62,6 @@ def fetch_emails_from_s3_and_store_in_kafka():
     except ClientError as e:
         log_error(f"Failed to list objects in S3 bucket {BUCKET_NAME}: {e}")
 
-if _name_ == '_main_':
-    # Fetch emails from S3 and store in Kafka
-    fetch_emails_from_s3_and_store_in_kafka()
+    # Fetch emails from S3 and store in Kafkafetch_emails_from_s3_and_store_in_kafka
+
+fetch_emails_from_s3_and_store_in_kafka()
