@@ -15,7 +15,7 @@ BUCKET_NAME = "ecompasse-mails"  # Set the correct bucket name
 PREFIX = 'emails\\'  # Set the prefix to match your S3 structure
 
 # Kafka configuration
-KAFKA_BOOTSTRAP_SERVERS = 'kafkaui.ecompasse.co:9092'
+KAFKA_BOOTSTRAP_SERVERS = 'localhost:9092'
 KAFKA_TOPIC = 'email_data'
 
 
