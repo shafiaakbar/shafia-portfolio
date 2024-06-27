@@ -16,7 +16,7 @@ def parse_email_from_stdin():
     headers['label_id'] = []
     headers['email_text'] = ""
     headers['html_body'] = ""
-
+ 
     # Handle different content types within the email
     if email_message.is_multipart():
         for part in email_message.iter_parts():

@@ -62,6 +62,6 @@ def fetch_emails_from_s3_and_store_in_kafka():
     except ClientError as e:
         log_error(f"Failed to list objects in S3 bucket {BUCKET_NAME}: {e}")
 
-    # Fetch emails from S3 and store in Kafkafetch_emails_from_s3_and_store_in_kafka
-
-fetch_emails_from_s3_and_store_in_kafka()
+if _name_ == '_main_':
+    # Fetch emails from S3 and store in Kafka
+    fetch_emails_from_s3_and_store_in_kafka()
