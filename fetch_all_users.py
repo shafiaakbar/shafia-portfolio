@@ -29,7 +29,7 @@ def fetch_all_users():
 
         # Request to list users
         request = service.users().list(customer='my_customer', maxResults=500)
-        users = []
+        users = [] #set to our database (users,mailboxes etc) api call
 
         while request is not None:
             response = request.execute()

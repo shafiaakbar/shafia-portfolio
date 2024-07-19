@@ -1,92 +1,14 @@
-# import os
-# import base64
-# import logging
-# from email import policy
-# from email.parser import BytesParser
-# from email.generator import BytesGenerator
-# from google.oauth2 import service_account
-# from googleapiclient.discovery import build
-# from googleapiclient.errors import HttpError
-# from fetch_all_users import all_users
-
-
-# #strenghen error handling, logging setup, dockerize, figuring out deployment options with configurations with clients
-# #figure this out for microsoft365
-# # Set up logging
-# logging.basicConfig(level=logging.INFO)
-
-# SCOPES = ['https://www.googleapis.com/auth/gmail.readonly','https://www.googleapis.com/auth/admin.directory.user.readonly'] 
-# SERVICE_ACCOUNT_FILE = 'C:/Users/Sanaan/Downloads/fiery-iridium-391414-debc38f08308.json'
-# DELEGATED_ADMIN_EMAIL = 'ali@ecompasse.com'  # Admin email for delegation
-
-# credentials = service_account.Credentials.from_service_account_file(
-#     SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-# delegated_credentials = credentials.with_subject(DELEGATED_ADMIN_EMAIL)
-
-# def process_mime_part(part):
-#     if part.get_content_maintype() == 'multipart':
-#         for subpart in part.get_payload():
-#             process_mime_part(subpart)
-#     elif part.get_content_maintype() == 'image':
-#         if not part.get('Content-ID'):
-#             part.add_header('Content-ID', f'<{part.get("Content-ID")}>')
-
-# def save_mime_as_eml(raw_email_bytes, file_path):
-#     parsed_email = BytesParser(policy=policy.default).parsebytes(raw_email_bytes)
-#     process_mime_part(parsed_email)
-#     with open(file_path, 'wb') as file:
-#         gen = BytesGenerator(file, policy=policy.default)
-#         gen.flatten(parsed_email)
-
-# def fetch_emails_for_user(user_email):
-#     logging.info(f"Switching to user: {user_email}")
-#     delegated_credentials = credentials.with_subject(user_email)
-#     service = build('gmail', 'v1', credentials=delegated_credentials)
-#     try:
-#         messages = service.users().messages().list(userId=user_email, maxResults=5).execute()
-#         for message in messages.get('messages', []):
-#             message_id = message['id']
-#             raw_message = service.users().messages().get(userId=user_email, id=message_id, format='raw').execute()
-#             raw_email_bytes = base64.urlsafe_b64decode(raw_message['raw'].encode('utf-8'))
-
-#             # Save the raw email content to a .eml file
-#             eml_file_name = f"email_{user_email}_{message_id}.eml"
-#             eml_file_path = os.path.join(os.path.dirname(__file__), eml_file_name)
-#             save_mime_as_eml(raw_email_bytes, eml_file_path)
-
-#     except HttpError as error:
-#         logging.error(f'Error fetching emails for user {user_email}: {error}')
-
-# def fetch_emails_for_all_users():
-#     try:
-#         # Fetch the list of users
-#         service = build('admin', 'directory_v1', credentials=delegated_credentials)
-#         request = service.users().list(customer='my_customer', maxResults=500)
-#         while request is not None:
-#             response = request.execute()
-#             for user in response['users']:
-#                 user_email = user['primaryEmail']
-#                 fetch_emails_for_user(user_email)
-
-#             request = service.users().list_next(previous_request=request, previous_response=response)
-
-#     except HttpError as error:
-#         logging.error(f'An error occurred: {error}')
-
-# if __name__ == '__main__':
-#     fetch_emails_for_all_users()
-
 import os
 import logging
 import base64
+import requests
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-import boto3
-from botocore.exceptions import NoCredentialsError, ClientError
 from dotenv import load_dotenv
 from error_logger import log_error, error_log_file
 from email_processor import EmailProcessor  # Import the EmailProcessor class
+import jwt
 
 # Load environment variables from .env file
 load_dotenv()
@@ -98,6 +20,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DELEGATED_ADMIN_EMAIL = os.getenv('DELEGATED_ADMIN_EMAIL')
 SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE')
 BUCKET_NAME = os.getenv('BUCKET_NAME')
+NEXT_PUBLIC_BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL')
+API_TOKEN = os.getenv('API_TOKEN')
 
 # Set up logging
 info_log_file = 'email_extraction_info.log'
@@ -166,16 +90,69 @@ def fetch_emails_for_user(user_email):
     except Exception as e:
         log_error(f'Unexpected error occurred while fetching emails for user {user_email}: {e}')
 
+def validate_user_data(user_data):
+    if not isinstance(user_data.get('password', ''), str):
+        user_data['password'] = ""  # Default to empty string if password is not a string
+    # Perform additional checks if necessary
+    return user_data
+    
+def get_tenant_id_from_token(token):
+    try:
+        # Print the token for debugging purposes
+        print(f"Token being parsed: {token}")
+        decoded_token = jwt.decode(token, options={"verify_signature": False})
+        return decoded_token.get('tenantId')
+    except jwt.DecodeError as e:
+        log_error(f"Error decoding token: {e}")
+        return None
+
+def push_user_to_db(user, tenant_id):
+    url = f"{NEXT_PUBLIC_BASE_URL}/user"
+    headers = {
+        'Authorization': f'Bearer {API_TOKEN}',
+        'Content-Type': 'application/json'
+    }
+    user_data = {
+        "name": user['name'],
+        "email": user['email'],
+        "rolename": user.get('rolename', []),   # Optional field
+        "password": user.get('password') or "",
+        # "tenantId": tenant_id  # Include tenantId from token
+    }
+    # Print the JSON data being sent
+    print("Sending JSON data to API:", user_data)
+    try:
+        response = requests.post(url, json=user_data, headers=headers)
+        response.raise_for_status()
+        logging.info(f"User {user['email']} successfully added to database.")
+    except requests.exceptions.HTTPError as err:
+        log_error(f"HTTP error occurred while pushing user {user['email']} to database: {err}")
+    except Exception as err:
+        log_error(f"Unexpected error occurred while pushing user {user['email']} to database: {err}")
+
 def fetch_emails_for_all_users():
+    tenant_id = get_tenant_id_from_token(API_TOKEN)
+    if not tenant_id:
+        log_error("Failed to extract tenantId from token")
+        return
+
     try:
         # Fetch the list of users
         service = build('admin', 'directory_v1', credentials=delegated_credentials)
         request = service.users().list(customer='my_customer', maxResults=500)
         while request is not None:
             response = request.execute()
+            # print(response['users'])
             for user in response['users']:
                 user_email = user['primaryEmail']
-                fetch_emails_for_user(user_email)
+                user_data = {
+                    "email": user_email,
+                    "name": user['name']['fullName'],
+                }
+                push_user_to_db(user_data, tenant_id)
+                # fetch_emails_for_user(user_email)
+                print(['hellooo'])
+                break
 
             request = service.users().list_next(previous_request=request, previous_response=response)
     except HttpError as error:
@@ -183,7 +160,7 @@ def fetch_emails_for_all_users():
     except Exception as e:
         log_error(f'Unexpected error occurred while fetching user list: {e}')
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fetch_emails_for_all_users()
 
     # Upload log files to S3 if not on-premises
