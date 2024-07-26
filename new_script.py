@@ -9,7 +9,7 @@ from botocore.exceptions import NoCredentialsError, ClientError
 from dotenv import load_dotenv
 from error_logger import log_error, error_log_file
 from email_processor import EmailProcessor  # Import the EmailProcessor class
-from kafka import KafkaProducer
+from confluent_kafka import Producer, Consumer, KafkaException, KafkaError
 import json
 
 # Load environment variables from .env file
@@ -21,9 +21,10 @@ ACCESS_KEY = os.getenv('ACCESS_KEY')
 SECRET_KEY = os.getenv('SECRET_KEY')
 DELEGATED_ADMIN_EMAIL = os.getenv('DELEGATED_ADMIN_EMAIL')
 SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE')
-BUCKET_NAME = os.getenv('BUCKET_NAME')
-KAFKA_BOOTSTRAP_SERVERS = 'localhost:9092'
-KAFKA_TOPIC = 'email_data'
+BUCKET_NAME = os.getenv('BUCKET_NAME').strip()
+KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS')  # Ensure this is set to 'localhost:9092'
+KAFKA_TOPIC = os.getenv('KAFKA_TOPIC')
+PROCESSED_EMAILS_TOPIC = os.getenv('PROCESSED_EMAILS_TOPIC')
 
 # Set up logging
 info_log_file = 'email_extraction_info.log'
@@ -44,14 +45,48 @@ delegated_credentials = credentials.with_subject(DELEGATED_ADMIN_EMAIL)
 
 # Initialize Kafka producer with debug logs
 try:
-    producer = KafkaProducer(
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS.split(','),
-        value_serializer=lambda v: json.dumps(v).encode('utf-8')
-    )
+    producer = Producer({'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS})
     logging.info(f"Kafka producer successfully connected to {KAFKA_BOOTSTRAP_SERVERS}")
 except Exception as e:
     log_error(f"Failed to connect to Kafka: {e}")
     raise
+
+def get_processed_email_ids():
+    consumer = Consumer({
+        'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
+        'group.id': 'email-processor',
+        'auto.offset.reset': 'earliest'
+    })
+
+    processed_email_ids = set()
+    consumer.subscribe([PROCESSED_EMAILS_TOPIC])
+
+    try:
+        while True:
+            msg = consumer.poll(1.0)
+            if msg is None:
+                break
+            if msg.error():
+                if msg.error().code() == KafkaError._PARTITION_EOF:
+                    continue
+                else:
+                    log_error(f"Consumer error: {msg.error()}")
+                    break
+
+            processed_email_id = msg.value().decode('utf-8')
+            processed_email_ids.add(processed_email_id)
+    finally:
+        consumer.close()
+
+    return processed_email_ids
+
+def mark_email_as_processed(email_id):
+    try:
+        producer.produce(PROCESSED_EMAILS_TOPIC, key=email_id, value=email_id)
+        producer.flush()
+        logging.info(f"Marked email {email_id} as processed")
+    except Exception as e:
+        log_error(f"Failed to mark email {email_id} as processed: {e}")
 
 def upload_to_s3(local_file_path, s3_file_path):
     try:
@@ -67,13 +102,17 @@ def upload_to_s3(local_file_path, s3_file_path):
 
 def send_email_to_kafka(email_data):
     try:
-        future = producer.send(KAFKA_TOPIC, email_data)
-        result = future.get(timeout=10)  # Wait for the send to complete and get result
-        logging.info(f"Sent email to Kafka topic {KAFKA_TOPIC}: {result}")
+        # Encode the raw email bytes to base64 and decode to string
+        email_data['raw_email_bytes'] = base64.b64encode(email_data['raw_email_bytes']).decode('utf-8')
+        
+        # Produce the message to Kafka as bytes
+        producer.produce(KAFKA_TOPIC, key=email_data['message_id'], value=json.dumps(email_data).encode('utf-8'))
+        producer.flush()
+        logging.info(f"Sent email to Kafka topic {KAFKA_TOPIC}")
     except Exception as e:
         log_error(f"Failed to send email to Kafka: {e}")
 
-def fetch_emails_for_user(user_email):
+def fetch_emails_for_user(user_email, processed_email_ids):
     logging.info(f"Switching to user: {user_email}")
     total_emails_fetched = 0
     try:
@@ -84,12 +123,20 @@ def fetch_emails_for_user(user_email):
         email_processor = EmailProcessor(user_folder)
 
         query = "in:anywhere"  # This query will fetch emails from all parts including spam and bin
+        logging.info(f"Query: {query}")
+
         next_page_token = None
         while True:
             messages = service.users().messages().list(userId='me', q=query, pageToken=next_page_token, maxResults=100).execute()
             if 'messages' in messages:
                 for message in messages['messages']:
                     message_id = message['id']
+                    
+                    # Skip if the email has already been processed
+                    if message_id in processed_email_ids:
+                        logging.info(f"Email {message_id} already processed. Skipping.")
+                        continue
+
                     raw_message = service.users().messages().get(userId='me', id=message_id, format='raw').execute()
                     raw_email_bytes = base64.urlsafe_b64decode(raw_message['raw'].encode('utf-8'))
 
@@ -102,7 +149,7 @@ def fetch_emails_for_user(user_email):
                     email_data = {
                         'user_email': user_email,
                         'message_id': message_id,
-                        'raw_email_bytes': raw_email_bytes.decode('utf-8')
+                        'raw_email_bytes': raw_email_bytes
                     }
                     # Send email data to Kafka
                     send_email_to_kafka(email_data)
@@ -110,6 +157,9 @@ def fetch_emails_for_user(user_email):
                     # Upload email to S3
                     s3_file_path = os.path.join('emails', user_email, eml_file_name)
                     upload_to_s3(eml_file_path, s3_file_path)
+
+                    # Mark email as processed
+                    mark_email_as_processed(message_id)
 
             next_page_token = messages.get('nextPageToken')
             if not next_page_token:
@@ -121,6 +171,7 @@ def fetch_emails_for_user(user_email):
         log_error(f'Unexpected error occurred while fetching emails for user {user_email}: {e}')
 
 def fetch_emails_for_all_users():
+    processed_email_ids = get_processed_email_ids()
     try:
         # Fetch the list of users
         service = build('admin', 'directory_v1', credentials=delegated_credentials)
@@ -129,7 +180,7 @@ def fetch_emails_for_all_users():
             response = request.execute()
             for user in response['users']:
                 user_email = user['primaryEmail']
-                fetch_emails_for_user(user_email)
+                fetch_emails_for_user(user_email, processed_email_ids)
 
             request = service.users().list_next(previous_request=request, previous_response=response)
     except HttpError as error:
