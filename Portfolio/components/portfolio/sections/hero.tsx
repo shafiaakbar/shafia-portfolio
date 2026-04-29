@@ -1,10 +1,30 @@
 "use client"
 
+import { useCallback, useRef, useState } from "react"
 import { motion } from "framer-motion"
+import { Mic, MicOff } from "lucide-react"
 import { SplineScene } from "@/components/ui/splite"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
 
 export function Hero() {
+  const splineRef = useRef<any>(null)
+  const [talking, setTalking] = useState(false)
+
+  const handleSplineLoad = useCallback((spline: any) => {
+    splineRef.current = spline
+  }, [])
+
+  function triggerRobotTalk() {
+    setTalking((v) => !v)
+    if (splineRef.current) {
+      try {
+        // Try common names used in Spline hero robot scenes
+        splineRef.current.emitEvent("mouseDown", "Robot")
+        splineRef.current.emitEvent("mouseDown", "Scene")
+      } catch {}
+    }
+  }
+
   return (
     <section id="core" className="relative min-h-screen">
       {/* Background glow */}
@@ -79,23 +99,56 @@ export function Hero() {
           >
             <LiquidButton
               size="lg"
-              onClick={() =>
-                document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="font-mono tracking-widest text-pink-400 shadow-[0_0_18px_rgba(255,0,127,0.25)]"
+              onClick={triggerRobotTalk}
+              className={`font-mono tracking-widest transition-all duration-300 ${
+                talking
+                  ? "text-pink-300 shadow-[0_0_24px_rgba(255,0,127,0.45)]"
+                  : "text-pink-400 shadow-[0_0_18px_rgba(255,0,127,0.25)]"
+              }`}
             >
-              VIEW_PROJECTS
+              <span className="flex items-center gap-2">
+                {talking ? (
+                  <MicOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Mic className="h-3.5 w-3.5" />
+                )}
+                {talking ? "END_CALL" : "TALK_TO_ME"}
+              </span>
             </LiquidButton>
+
             <LiquidButton
               size="lg"
               onClick={() =>
-                document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+                document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
               }
               className="font-mono tracking-widest text-zinc-300"
             >
-              CONTACT
+              VIEW_PROJECTS
             </LiquidButton>
           </motion.div>
+
+          {/* Talking state indicator */}
+          {talking && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-3 font-mono text-xs text-pink-500/70"
+            >
+              <span className="flex gap-1">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <motion.span
+                    key={i}
+                    className="inline-block w-0.5 rounded-full bg-pink-500"
+                    animate={{ height: ["6px", "18px", "6px"] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                    style={{ height: "6px" }}
+                  />
+                ))}
+              </span>
+              VOICE_CHANNEL_OPEN // CONNECTING...
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Right — Spline 3D */}
@@ -106,10 +159,38 @@ export function Hero() {
           className="relative hidden md:block"
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(255,0,127,0.07),transparent_70%)]" />
-          <SplineScene
-            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+
+          {/* Float wrapper */}
+          <motion.div
             className="h-full w-full"
-          />
+            animate={{ y: [0, -14, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <SplineScene
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="h-full w-full"
+              onLoad={handleSplineLoad}
+            />
+          </motion.div>
+
+          {/* Talking ring pulse around robot */}
+          {talking && (
+            <motion.div
+              className="pointer-events-none absolute inset-0 flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {[1, 1.4, 1.8].map((scale, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute h-48 w-48 rounded-full border border-pink-500/20"
+                  animate={{ scale: [scale, scale + 0.3, scale], opacity: [0.4, 0, 0.4] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.4, ease: "easeOut" }}
+                />
+              ))}
+            </motion.div>
+          )}
+
           <p className="absolute bottom-4 left-4 font-mono text-[10px] text-pink-500/30">
             RENDER_ENGINE: NEURAL_VIZ_4 // COORD: 45.23.001.X9
           </p>
