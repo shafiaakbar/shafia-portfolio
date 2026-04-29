@@ -13,7 +13,12 @@ export function useVapi() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
-    const vapi = new Vapi(process.env.NEXT_PUBLIC_VAPI_KEY!)
+    // avoidEval: true is required for iOS Safari (WebKit blocks eval in WebRTC)
+    const vapi = new Vapi(
+      process.env.NEXT_PUBLIC_VAPI_KEY!,
+      undefined,
+      { avoidEval: true, alwaysIncludeMicInPermissionPrompt: true }
+    )
     vapiRef.current = vapi
 
     vapi.on('call-start', () => {
@@ -38,7 +43,7 @@ export function useVapi() {
     vapi.on('call-start-failed', (e) => {
       console.error('[Vapi] call-start-failed:', e)
       setStatus('error')
-      setErrorMsg(e.error ?? `Failed at stage: ${e.stage}`)
+      setErrorMsg(e.error ?? `Failed at: ${e.stage}`)
       setTimeout(() => { setStatus('idle'); setErrorMsg(null) }, 4000)
     })
 
@@ -56,6 +61,18 @@ export function useVapi() {
   const start = useCallback(async () => {
     setStatus('connecting')
     setErrorMsg(null)
+
+    // Explicitly request mic — mobile browsers often require this before WebRTC
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream.getTracks().forEach(t => t.stop()) // release immediately; Vapi will re-acquire
+    } catch (e: any) {
+      setStatus('error')
+      setErrorMsg('Microphone permission denied')
+      setTimeout(() => { setStatus('idle'); setErrorMsg(null) }, 4000)
+      return
+    }
+
     try {
       const result = await vapiRef.current?.start(process.env.NEXT_PUBLIC_VAPI_AGENT_ID!)
       if (!result) {
