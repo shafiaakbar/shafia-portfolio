@@ -24,12 +24,15 @@ interface RadialOrbitalTimelineProps {
 export default function RadialOrbitalTimeline({
   timelineData,
 }: RadialOrbitalTimelineProps) {
+  const [mounted, setMounted] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
   const [rotationAngle, setRotationAngle] = useState<number>(0);
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
   const [pulseEffect, setPulseEffect] = useState<Record<number, boolean>>({});
   const [centerOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [activeNodeId, setActiveNodeId] = useState<number | null>(null);
+
+  useEffect(() => { setMounted(true); }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const orbitRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -149,11 +152,11 @@ export default function RadialOrbitalTimeline({
                 key={item.id}
                 ref={(el) => { nodeRefs.current[item.id] = el; }}
                 className="absolute transition-all duration-700 cursor-pointer"
-                style={{
+                style={mounted ? {
                   transform: `translate(${position.x}px, ${position.y}px)`,
                   zIndex: isExpanded ? 200 : position.zIndex,
                   opacity: isExpanded ? 1 : position.opacity,
-                }}
+                } : { opacity: 0 }}
                 onClick={(e) => { e.stopPropagation(); toggleItem(item.id); }}
               >
                 <div
