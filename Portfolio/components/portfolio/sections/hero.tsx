@@ -37,19 +37,35 @@ export function Hero() {
   }
 
   return (
-    <section id="core" className="relative min-h-screen">
+    <section id="core" className="relative min-h-screen overflow-hidden">
       {/* Background glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-32 top-1/2 h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-pink-500 opacity-[0.07] blur-[140px]" />
       </div>
 
-      <div className="grid min-h-screen grid-cols-1 md:grid-cols-2 grid-rows-[auto_1fr] md:grid-rows-1">
+      {/* Mobile robot — absolute behind text */}
+      <div className="pointer-events-none absolute inset-0 md:hidden">
+        <motion.div
+          className="h-full w-full opacity-25"
+          animate={{ y: [0, -14, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <SplineScene
+            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+            className="h-full w-full"
+          />
+        </motion.div>
+        {/* Gradient so text stays readable */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/90" />
+      </div>
+
+      <div className="grid min-h-screen grid-cols-1 md:grid-cols-2">
         {/* Left — text */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="flex flex-col justify-center px-8 py-10 pt-6 md:py-24 md:pt-28 md:px-16 gap-7 relative z-10"
+          className="flex flex-col justify-center px-8 py-24 pt-28 md:px-16 gap-7 relative z-10"
         >
           {/* Badge */}
           <motion.div
@@ -184,7 +200,7 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, delay: 0.4 }}
-          className="relative order-first h-[340px] md:order-last md:h-auto"
+          className="relative hidden md:block"
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(255,0,127,0.07),transparent_70%)]" />
 
