@@ -6,6 +6,7 @@ import { Terminal, Radio, Grid2X2, Layers, Cpu, History } from "lucide-react"
 import { Hero } from "./sections/hero"
 import { About } from "./sections/about"
 import { Projects } from "./sections/projects"
+import { Agents } from "./sections/agents"
 import { Process } from "./sections/process"
 import { Experience } from "./sections/experience"
 import { Contact } from "./sections/contact"
@@ -13,6 +14,7 @@ import { Contact } from "./sections/contact"
 const navLinks = [
   { label: "CORE", href: "core" },
   { label: "PROJECTS", href: "projects" },
+  { label: "AGENTS", href: "agents" },
   { label: "PROCESS", href: "process" },
   { label: "LOGS", href: "logs" },
   { label: "CONTACT", href: "contact" },
@@ -145,6 +147,7 @@ export function Portfolio() {
       <Hero />
       <About />
       <Projects />
+      <Agents />
       <Process />
       <Experience />
       <Contact />
