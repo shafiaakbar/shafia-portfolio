@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Terminal, Radio, Grid2X2, Layers, Cpu, History } from "lucide-react"
 import { Hero } from "./sections/hero"
 import { About } from "./sections/about"
-import { Projects } from "./sections/projects"
 import { Agents } from "./sections/agents"
 import { Process } from "./sections/process"
 import { Experience } from "./sections/experience"
@@ -13,7 +12,6 @@ import { Contact } from "./sections/contact"
 
 const navLinks = [
   { label: "CORE", href: "core" },
-  { label: "PROJECTS", href: "projects" },
   { label: "AGENTS", href: "agents" },
   { label: "PROCESS", href: "process" },
   { label: "LOGS", href: "logs" },
@@ -22,7 +20,7 @@ const navLinks = [
 
 const mobileNavLinks = [
   { label: "CORE", icon: Grid2X2, href: "core" },
-  { label: "PROJECTS", icon: Layers, href: "projects" },
+
   { label: "PROCESS", icon: Cpu, href: "process" },
   { label: "LOGS", icon: History, href: "logs" },
 ]
@@ -146,7 +144,6 @@ export function Portfolio() {
       {/* Sections */}
       <Hero />
       <About />
-      <Projects />
       <Agents />
       <Process />
       <Experience />
