@@ -1,24 +1,33 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useRef } from "react"
 import { motion } from "framer-motion"
-import { Mic, MicOff } from "lucide-react"
+import { Mic, MicOff, Loader2 } from "lucide-react"
 import { SplineScene } from "@/components/ui/splite"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
+import { useVapi } from "@/hooks/use-vapi"
+
+const STATUS_LABEL: Record<string, string> = {
+  idle: "",
+  connecting: "ESTABLISHING_UPLINK...",
+  active: "VOICE_CHANNEL_OPEN",
+  ending: "TERMINATING_SESSION...",
+}
 
 export function Hero() {
   const splineRef = useRef<any>(null)
-  const [talking, setTalking] = useState(false)
+  const { status, volume, isSpeaking, toggle } = useVapi()
 
   const handleSplineLoad = useCallback((spline: any) => {
     splineRef.current = spline
   }, [])
 
-  function triggerRobotTalk() {
-    setTalking((v) => !v)
+  const isLive = status === "active" || status === "connecting"
+
+  function handleTalkClick() {
+    toggle()
     if (splineRef.current) {
       try {
-        // Try common names used in Spline hero robot scenes
         splineRef.current.emitEvent("mouseDown", "Robot")
         splineRef.current.emitEvent("mouseDown", "Scene")
       } catch {}
@@ -99,20 +108,23 @@ export function Hero() {
           >
             <LiquidButton
               size="lg"
-              onClick={triggerRobotTalk}
-              className={`font-mono tracking-widest transition-all duration-300 ${
-                talking
-                  ? "text-pink-300 shadow-[0_0_24px_rgba(255,0,127,0.45)]"
+              onClick={handleTalkClick}
+              disabled={status === "connecting" || status === "ending"}
+              className={`font-mono tracking-widest transition-all duration-300 disabled:opacity-60 ${
+                isLive
+                  ? "text-pink-300 shadow-[0_0_28px_rgba(255,0,127,0.5)]"
                   : "text-pink-400 shadow-[0_0_18px_rgba(255,0,127,0.25)]"
               }`}
             >
               <span className="flex items-center gap-2">
-                {talking ? (
+                {status === "connecting" || status === "ending" ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : status === "active" ? (
                   <MicOff className="h-3.5 w-3.5" />
                 ) : (
                   <Mic className="h-3.5 w-3.5" />
                 )}
-                {talking ? "END_CALL" : "TALK_TO_ME"}
+                {status === "active" ? "END_CALL" : status === "connecting" ? "CONNECTING..." : "TALK_TO_ME"}
               </span>
             </LiquidButton>
 
@@ -127,26 +139,29 @@ export function Hero() {
             </LiquidButton>
           </motion.div>
 
-          {/* Talking state indicator */}
-          {talking && (
+          {/* Live voice indicator */}
+          {isLive && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
               className="flex items-center gap-3 font-mono text-xs text-pink-500/70"
             >
-              <span className="flex gap-1">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <motion.span
-                    key={i}
-                    className="inline-block w-0.5 rounded-full bg-pink-500"
-                    animate={{ height: ["6px", "18px", "6px"] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                    style={{ height: "6px" }}
-                  />
-                ))}
+              {/* Volume-driven waveform bars */}
+              <span className="flex items-end gap-[3px]">
+                {[0.4, 0.7, 1, 0.7, 0.5, 0.85, 0.6, 0.4, 0.9, 0.55].map((base, i) => {
+                  const h = status === "active" ? Math.max(4, (volume * base * 28) + 4) : 4
+                  return (
+                    <motion.span
+                      key={i}
+                      className="inline-block w-[3px] rounded-full bg-pink-500"
+                      animate={{ height: `${h}px` }}
+                      transition={{ duration: 0.1, ease: "easeOut" }}
+                      style={{ height: "4px" }}
+                    />
+                  )
+                })}
               </span>
-              VOICE_CHANNEL_OPEN // CONNECTING...
+              {STATUS_LABEL[status]}
             </motion.div>
           )}
         </motion.div>
@@ -160,11 +175,15 @@ export function Hero() {
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(255,0,127,0.07),transparent_70%)]" />
 
-          {/* Float wrapper */}
+          {/* Float wrapper — bobs faster when speaking */}
           <motion.div
             className="h-full w-full"
             animate={{ y: [0, -14, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            transition={{
+              duration: isSpeaking ? 1.8 : 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           >
             <SplineScene
               scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
@@ -173,19 +192,27 @@ export function Hero() {
             />
           </motion.div>
 
-          {/* Talking ring pulse around robot */}
-          {talking && (
+          {/* Pulsing rings — volume-driven scale */}
+          {isLive && (
             <motion.div
               className="pointer-events-none absolute inset-0 flex items-center justify-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              {[1, 1.4, 1.8].map((scale, i) => (
+              {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="absolute h-48 w-48 rounded-full border border-pink-500/20"
-                  animate={{ scale: [scale, scale + 0.3, scale], opacity: [0.4, 0, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.4, ease: "easeOut" }}
+                  className="absolute h-48 w-48 rounded-full border border-pink-500/25"
+                  animate={{
+                    scale: [1 + i * 0.35, 1 + i * 0.35 + 0.25 + volume * 0.5, 1 + i * 0.35],
+                    opacity: [0.4, 0, 0.4],
+                  }}
+                  transition={{
+                    duration: isSpeaking ? 0.8 : 2,
+                    repeat: Infinity,
+                    delay: i * 0.3,
+                    ease: "easeOut",
+                  }}
                 />
               ))}
             </motion.div>
