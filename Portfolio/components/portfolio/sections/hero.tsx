@@ -83,38 +83,44 @@ export function Hero() {
 
           {/* Name */}
           <div>
-            {["SHAFIA", "BAHAR"].map((word, i) => (
-              <motion.h1
-                key={word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.65, delay: 0.25 + i * 0.12 }}
-                className="text-6xl font-black leading-none tracking-wider text-white md:text-7xl"
-              >
-                {word}
-              </motion.h1>
-            ))}
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mb-1 font-mono text-sm tracking-widest text-zinc-500"
+            >
+              Hi,
+            </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, delay: 0.28 }}
+              className="text-6xl font-black leading-none tracking-tight text-white md:text-7xl"
+            >
+              Shafia here.
+            </motion.h1>
           </div>
 
           {/* Title */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.52 }}
-            className="font-mono text-sm tracking-[0.3em] text-pink-500"
+            transition={{ delay: 0.45 }}
+            className="font-mono text-sm tracking-[0.25em] text-pink-500"
           >
-            FORWARD DEPLOYED AI ENGINEER
+            FORWARD DEPLOYED ENGINEER
           </motion.p>
 
-          {/* Bio */}
+          {/* Tagline */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.62 }}
-            className="max-w-md border-l-2 border-zinc-800 pl-4 leading-relaxed text-zinc-400"
+            transition={{ delay: 0.58 }}
+            className="max-w-md font-mono text-sm leading-relaxed text-zinc-400"
           >
-            Building voice-first AI systems and autonomous healthcare workflows
-            at the intersection of LLMs and real-world operations.
+            <span className="text-pink-500/60">&gt; </span>
+            i save lives — just… indirectly{" "}
+            <span className="text-zinc-600">(HIPAA-compliant voice agents)</span>
           </motion.p>
 
           {/* CTAs */}
