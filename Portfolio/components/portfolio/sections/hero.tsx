@@ -12,17 +12,19 @@ const STATUS_LABEL: Record<string, string> = {
   connecting: "ESTABLISHING_UPLINK...",
   active: "VOICE_CHANNEL_OPEN",
   ending: "TERMINATING_SESSION...",
+  error: "CONNECTION_FAILED",
 }
 
 export function Hero() {
   const splineRef = useRef<any>(null)
-  const { status, volume, isSpeaking, toggle } = useVapi()
+  const { status, volume, isSpeaking, errorMsg, toggle } = useVapi()
 
   const handleSplineLoad = useCallback((spline: any) => {
     splineRef.current = spline
   }, [])
 
   const isLive = status === "active" || status === "connecting"
+  const isError = status === "error"
 
   function handleTalkClick() {
     toggle()
@@ -138,6 +140,17 @@ export function Hero() {
               VIEW_PROJECTS
             </LiquidButton>
           </motion.div>
+
+          {/* Error display */}
+          {isError && errorMsg && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="font-mono text-xs text-red-400/80"
+            >
+              ✕ {errorMsg}
+            </motion.div>
+          )}
 
           {/* Live voice indicator */}
           {isLive && (
