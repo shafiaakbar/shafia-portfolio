@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { SplineScene } from "@/components/ui/splite"
+import { LiquidButton } from "@/components/ui/liquid-glass-button"
 
 export function Hero() {
   return (
@@ -76,22 +77,24 @@ export function Hero() {
             transition={{ delay: 0.72 }}
             className="flex flex-wrap gap-4 pt-2"
           >
-            <button
+            <LiquidButton
+              size="lg"
               onClick={() =>
                 document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="bg-pink-600 px-6 py-3 text-sm font-semibold tracking-widest text-black shadow-[0_0_18px_rgba(255,0,127,0.35)] transition hover:bg-pink-500"
+              className="font-mono tracking-widest text-pink-400 shadow-[0_0_18px_rgba(255,0,127,0.25)]"
             >
               VIEW_PROJECTS
-            </button>
-            <button
+            </LiquidButton>
+            <LiquidButton
+              size="lg"
               onClick={() =>
                 document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="border border-pink-500 px-6 py-3 text-sm font-semibold tracking-widest text-pink-500 transition hover:bg-pink-500/10"
+              className="font-mono tracking-widest text-zinc-300"
             >
               CONTACT
-            </button>
+            </LiquidButton>
           </motion.div>
         </motion.div>
 
