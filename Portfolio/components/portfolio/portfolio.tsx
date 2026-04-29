@@ -12,7 +12,7 @@ import { Contact } from "./sections/contact"
 
 const navLinks = [
   { label: "CORE", href: "core" },
-  { label: "AGENTS", href: "agents" },
+  { label: "PROJECTS", href: "agents" },
   { label: "PROCESS", href: "process" },
   { label: "LOGS", href: "logs" },
   { label: "CONTACT", href: "contact" },

@@ -175,8 +175,8 @@ export function Agents() {
           className="mb-12 flex items-baseline justify-between border-b border-zinc-800 pb-4"
         >
           <div className="flex items-baseline gap-4">
-            <h2 className="text-2xl text-white">AGENT_TREE</h2>
-            <span className="font-mono text-xs text-pink-500">NEURAL_NETWORK_MAP</span>
+            <h2 className="text-2xl text-white">PROJECTS</h2>
+            <span className="font-mono text-xs text-pink-500">AGENT_NETWORK_MAP</span>
           </div>
           <span className="hidden font-mono text-xs text-zinc-700 md:block">
             05 AGENTS DEPLOYED
