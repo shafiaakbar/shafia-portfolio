@@ -57,7 +57,7 @@ function AvatarTilt() {
       style={{ perspective: 900 }}
       className="cursor-pointer select-none"
     >
-      <div
+      <motion.div
         className="animate-float-xslow relative w-64 overflow-hidden border border-pink-500/30"
         style={{
           rotateX,
@@ -87,7 +87,7 @@ function AvatarTilt() {
         <div className="absolute right-2 top-2 h-3 w-3 border-r border-t border-pink-500/70" />
         <div className="absolute bottom-2 left-2 h-3 w-3 border-b border-l border-pink-500/70" />
         <div className="absolute bottom-2 right-2 h-3 w-3 border-b border-r border-pink-500/70" />
-      </div>
+      </motion.div>
 
       <div className="mt-3 flex items-center justify-between font-mono text-[9px] tracking-widest">
         <span className="text-zinc-600">IDENTITY_CONFIRMED</span>
