@@ -1,96 +1,140 @@
 "use client"
 
-import { useRef } from "react"
-import { motion, useInView } from "framer-motion"
+import { useState } from "react"
+import { motion } from "framer-motion"
 
-// Each line is an array of segments: { t: text, c: color-key }
-// Colors: "cmd" dim-pink | "pink" bright pink | "white" bright white | "dim" zinc-600 | "mid" zinc-400
-type Seg = { t: string; c?: "cmd" | "pink" | "white" | "dim" | "mid" }
-type Line = Seg[] | null // null = blank line
-
-const LINES: Line[] = [
-  // ── Init ──────────────────────────────────────────────────────────────────
-  [{ t: "> ", c: "pink" }, { t: "Initializing Architect Data...", c: "cmd" }],
-  null,
-  // ── Identity ──────────────────────────────────────────────────────────────
-  [
-    { t: "> ", c: "pink" },
-    { t: "Shafia B", c: "white" },
-    { t: ", " },
-    { t: "Forward Deployed Engineer", c: "pink" },
-    { t: " @ " },
-    { t: "Karing.ai", c: "white" },
-  ],
-  [
-    { t: "> ", c: "pink" },
-    { t: "Builds healthcare voice agents that have handled " },
-    { t: "400k+ real calls", c: "pink" },
-  ],
-  null,
-  // ── Why Shafia ─────────────────────────────────────────────────────────────
-  [{ t: "> ", c: "pink" }, { t: "Why Shafia?", c: "white" }],
-  [
-    { t: "  - ", c: "pink" },
-    { t: "Takes projects from " },
-    { t: '"idea..."', c: "dim" },
-    { t: " to " },
-    { t: '"it\'s live btw"', c: "pink" },
-  ],
-  [
-    { t: "  - ", c: "pink" },
-    { t: "Works directly with clients" },
-    { t: " — no middle drama", c: "white" },
-  ],
-  [
-    { t: "  - ", c: "pink" },
-    { t: "Saves lives", c: "white" },
-    { t: " and money" },
-  ],
-  null,
-  // ── Side Quest ─────────────────────────────────────────────────────────────
-  [{ t: "> ", c: "pink" }, { t: "Side Quest:", c: "white" }],
-  [
-    { t: "  - ", c: "pink" },
-    { t: "BuyBestie", c: "pink" },
-    { t: ", a white-glove shopping" },
-    { t: ", but actually reliable", c: "white" },
-  ],
-  null,
-  // ── Education ──────────────────────────────────────────────────────────────
-  [
-    { t: "> ", c: "pink" },
-    { t: "BSCS @ IOBM, " },
-    { t: "June 2026", c: "white" },
-    { t: " (almost there…)", c: "cmd" },
-  ],
-  null,
-  // ── Status ─────────────────────────────────────────────────────────────────
-  [
-    { t: "> ", c: "pink" },
-    { t: "Status:  " },
-    { t: "Deployed. Iterating. Building in production.", c: "pink" },
-  ],
+const CARDS = [
+  {
+    front: { label: "IDENTITY.EXE", title: "Who's Shafia?" },
+    back:  { label: "IDENTITY.EXE", text: "Shafia is a student & FDE @ Karing.ai who likes exploring new things, solving problems, and turning complex shit into things that actually provide value." },
+  },
+  {
+    front: { label: "WHY_SHAFIA.SH", title: "Why Shafia?" },
+    back:  { label: "WHY_SHAFIA.SH", text: "She figures things out on her own, works directly with clients, adapts fast, and has built automations + AI agents handling 5,000+ calls a day." },
+  },
+  {
+    front: { label: "SIDE_QUEST.LOG", title: "Shafia's Side Quest?" },
+    back:  { label: "SIDE_QUEST.LOG", text: "Building BuyBestie — a white-gloved personal shopping experience focused on making fashion sourcing feel effortless." },
+  },
 ]
 
-const COLOR: Record<string, string> = {
-  cmd:   "text-pink-500/50",
-  pink:  "text-pink-400",
-  white: "text-white font-medium",
-  dim:   "text-zinc-600 italic",
-  mid:   "text-zinc-400",
-  default: "text-zinc-500",
+const floatClasses = ["animate-float-slow", "animate-float-med", "animate-float-fast"]
+
+function FlipCard({ card, index }: { card: typeof CARDS[0]; index: number }) {
+  const [flipped, setFlipped] = useState(false)
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.12 }}
+      className="flex-1 min-w-0"
+    >
+      <div
+        onMouseEnter={() => { setHovered(true); setFlipped(true) }}
+        onMouseLeave={() => { setHovered(false); setFlipped(false) }}
+        style={{ perspective: 900 }}
+        className={`cursor-pointer w-full select-none ${floatClasses[index]}`}
+      >
+        <motion.div
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
+          style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" } as React.CSSProperties}
+          className="relative h-80"
+        >
+
+          {/* ── FRONT ── */}
+          <div
+            className="absolute inset-0 flex flex-col justify-between p-6 overflow-hidden"
+            style={{
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(0deg)",
+              willChange: "transform",
+              border: hovered && !flipped ? "1px solid rgba(255,0,127,0.6)" : "1px solid rgba(255,0,127,0.3)",
+              background: "rgba(9,9,11,0.9)",
+              boxShadow: hovered && !flipped
+                ? "0 0 30px rgba(255,0,127,0.25), 0 0 80px rgba(255,0,127,0.1)"
+                : "0 0 20px rgba(255,0,127,0.12), 0 0 60px rgba(255,0,127,0.05)",
+              transition: "box-shadow 0.3s ease, border-color 0.3s ease",
+            }}
+          >
+            {/* Scanlines */}
+            <div className="pointer-events-none absolute inset-0 opacity-30"
+              style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px)" }} />
+            {/* Top accent */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-pink-500 via-pink-400 to-transparent opacity-70" />
+            {/* Corner brackets */}
+            <div className="absolute top-2 left-2  h-3 w-3 border-l border-t border-pink-500/70" />
+            <div className="absolute top-2 right-2 h-3 w-3 border-r border-t border-pink-500/70" />
+            <div className="absolute bottom-2 left-2  h-3 w-3 border-b border-l border-pink-500/70" />
+            <div className="absolute bottom-2 right-2 h-3 w-3 border-b border-r border-pink-500/70" />
+
+            <span className="font-mono text-[9px] tracking-[0.2em] text-pink-500/60 z-10">
+              {card.front.label}
+            </span>
+
+            {/* Centered title */}
+            <div className="absolute inset-0 flex items-center justify-center z-10 px-6">
+              <p
+                className="text-center text-3xl font-black leading-tight text-white"
+                style={{ fontFamily: "var(--font-orbitron)" }}
+              >
+                {card.front.title}
+              </p>
+            </div>
+
+            <p className="font-mono text-[9px] tracking-widest text-zinc-600 animate-pulse z-10 self-end">
+              CLICK TO DECRYPT
+            </p>
+          </div>
+
+          {/* ── BACK ── */}
+          <div
+            className="absolute inset-0 flex items-center justify-center p-6 overflow-hidden"
+            style={{
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(180deg)",
+              willChange: "transform",
+              border: "1px solid rgba(255,0,127,0.5)",
+              background: "#09090b",
+              boxShadow: "0 0 30px rgba(255,0,127,0.2), 0 0 80px rgba(255,0,127,0.08)",
+            }}
+          >
+            {/* Scanlines */}
+            <div className="pointer-events-none absolute inset-0 opacity-30"
+              style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px)" }} />
+            {/* Top accent */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
+            {/* Corner brackets */}
+            <div className="absolute top-2 left-2  h-3 w-3 border-l border-t border-pink-500" />
+            <div className="absolute top-2 right-2 h-3 w-3 border-r border-t border-pink-500" />
+            <div className="absolute bottom-2 left-2  h-3 w-3 border-b border-l border-pink-500" />
+            <div className="absolute bottom-2 right-2 h-3 w-3 border-b border-r border-pink-500" />
+            {/* Label — pinned top */}
+            <span className="absolute top-6 left-6 font-mono text-[9px] tracking-[0.2em] text-pink-500 z-10">
+              {card.back.label}
+            </span>
+            {/* Pink glow blob */}
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_80%,rgba(255,0,127,0.12),transparent_70%)]" />
+            <p className="font-mono text-sm leading-relaxed text-zinc-200 z-10 text-center">
+              {card.back.text}
+            </p>
+          </div>
+
+        </motion.div>
+      </div>
+    </motion.div>
+  )
 }
 
 export function About() {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-80px" })
-
-  // Flatten for delay calculation (blank lines still count as a beat)
-  let lineIdx = 0
-
   return (
-    <section id="logs" className="py-28 px-4 md:px-16">
-      <div className="mx-auto max-w-4xl">
+    <section id="about" className="py-16 md:py-28 px-4 md:px-16">
+      <div className="mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -102,47 +146,10 @@ export function About() {
           <span className="font-mono text-xs text-pink-500">ARCHITECT_BIO</span>
         </motion.div>
 
-        <div
-          ref={ref}
-          className="relative overflow-hidden border border-zinc-900 bg-zinc-950/50 p-8 font-mono text-sm leading-relaxed"
-        >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,0,127,0.025),transparent)]" />
-
-          <div className="space-y-[6px]">
-            {LINES.map((line, i) => {
-              const delay = lineIdx * 0.1
-              lineIdx++
-
-              if (line === null) {
-                return <div key={i} className="h-2" />
-              }
-
-              return (
-                <motion.p
-                  key={i}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.35, delay }}
-                >
-                  {line.map((seg, j) => (
-                    <span key={j} className={COLOR[seg.c ?? "default"]}>
-                      {seg.t}
-                    </span>
-                  ))}
-                </motion.p>
-              )
-            })}
-
-            {/* Blinking cursor */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: lineIdx * 0.1 }}
-              className="animate-pulse text-pink-500"
-            >
-              &gt; █
-            </motion.p>
-          </div>
+        <div className="flex flex-col gap-6 md:flex-row">
+          {CARDS.map((card, i) => (
+            <FlipCard key={i} card={card} index={i} />
+          ))}
         </div>
       </div>
     </section>

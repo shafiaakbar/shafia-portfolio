@@ -5,6 +5,8 @@ import { motion } from "framer-motion"
 import { Mic, MicOff, Loader2 } from "lucide-react"
 import { SplineScene } from "@/components/ui/splite"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
+import { Magnetic } from "@/components/ui/magnetic"
+import { ScrambleText } from "@/components/ui/scramble-text"
 import { useVapi } from "@/hooks/use-vapi"
 
 const STATUS_LABEL: Record<string, string> = {
@@ -67,27 +69,13 @@ export function Hero() {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="flex flex-col justify-center px-8 py-24 pt-28 md:px-16 gap-7 relative z-10"
         >
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15 }}
-            className="inline-flex w-fit items-center gap-2 border border-pink-500/30 bg-pink-500/5 px-3 py-1 font-mono text-xs tracking-widest text-pink-500"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-pink-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-pink-500" />
-            </span>
-            SYSTEM_ACTIVE // V4.0.2
-          </motion.div>
-
           {/* Name */}
           <div>
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mb-1 font-mono text-sm tracking-widest text-zinc-500"
+              className="mb-1 font-mono text-xl tracking-widest text-zinc-300 font-semibold"
             >
               Hi,
             </motion.p>
@@ -95,9 +83,23 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.28 }}
-              className="text-6xl font-black leading-none tracking-tight text-white md:text-7xl"
+              className="text-6xl font-black leading-none tracking-tight md:text-7xl"
+              style={{ fontFamily: "var(--font-orbitron)" }}
             >
-              Shafia here.
+              <ScrambleText
+                text="Shafia here."
+                delay={0.3}
+                speed={35}
+                charDelay={2}
+                style={{
+                  backgroundImage: "linear-gradient(90deg, #ff007f, #ffffff, #ff007f)",
+                  backgroundSize: "200% auto",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  animation: "gradient-sweep 4s linear infinite",
+                }}
+              />
             </motion.h1>
           </div>
 
@@ -106,21 +108,15 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.45 }}
-            className="font-mono text-sm tracking-[0.25em] text-pink-500"
+            className="font-mono text-lg tracking-[0.2em] text-pink-400 font-bold"
           >
-            FORWARD DEPLOYED ENGINEER
-          </motion.p>
-
-          {/* Tagline */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.58 }}
-            className="max-w-md font-mono text-sm leading-relaxed text-zinc-400"
-          >
-            <span className="text-pink-500/60">&gt; </span>
-            i save lives — just… indirectly{" "}
-            <span className="text-zinc-600">(HIPAA-compliant voice agents)</span>
+            <ScrambleText
+              text="FORWARD DEPLOYED ENGINEER"
+              delay={1.4}
+              speed={30}
+              charDelay={1}
+              className="text-pink-400"
+            />
           </motion.p>
 
           {/* CTAs */}
@@ -130,37 +126,41 @@ export function Hero() {
             transition={{ delay: 0.72 }}
             className="flex flex-wrap gap-4 pt-2"
           >
-            <LiquidButton
-              size="lg"
-              onClick={handleTalkClick}
-              disabled={status === "connecting" || status === "ending"}
-              className={`font-mono tracking-widest transition-all duration-300 disabled:opacity-60 ${
-                isLive
-                  ? "text-pink-300 shadow-[0_0_28px_rgba(255,0,127,0.5)]"
-                  : "text-pink-400 shadow-[0_0_18px_rgba(255,0,127,0.25)]"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                {status === "connecting" || status === "ending" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : status === "active" ? (
-                  <MicOff className="h-3.5 w-3.5" />
-                ) : (
-                  <Mic className="h-3.5 w-3.5" />
-                )}
-                {status === "active" ? "END_CALL" : status === "connecting" ? "CONNECTING..." : "TALK_TO_ME"}
-              </span>
-            </LiquidButton>
+            <Magnetic>
+              <LiquidButton
+                size="lg"
+                onClick={handleTalkClick}
+                disabled={status === "connecting" || status === "ending"}
+                className={`font-mono tracking-widest transition-all duration-300 disabled:opacity-60 ${
+                  isLive
+                    ? "text-pink-300 shadow-[0_0_28px_rgba(255,0,127,0.5)]"
+                    : "text-pink-400 shadow-[0_0_18px_rgba(255,0,127,0.25)]"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  {status === "connecting" || status === "ending" ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : status === "active" ? (
+                    <MicOff className="h-3.5 w-3.5" />
+                  ) : (
+                    <Mic className="h-3.5 w-3.5" />
+                  )}
+                  {status === "active" ? "END_CALL" : status === "connecting" ? "CONNECTING..." : "TALK_TO_ME"}
+                </span>
+              </LiquidButton>
+            </Magnetic>
 
-            <LiquidButton
-              size="lg"
-              onClick={() =>
-                document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="font-mono tracking-widest text-zinc-300"
-            >
-              VIEW_PROJECTS
-            </LiquidButton>
+            <Magnetic>
+              <LiquidButton
+                size="lg"
+                onClick={() =>
+                  document.getElementById("agents")?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="font-mono tracking-widest text-zinc-300"
+              >
+                VIEW_PROJECTS
+              </LiquidButton>
+            </Magnetic>
           </motion.div>
 
           {/* Error display */}
@@ -181,7 +181,6 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center gap-3 font-mono text-xs text-pink-500/70"
             >
-              {/* Volume-driven waveform bars */}
               <span className="flex items-end gap-[3px]">
                 {[0.4, 0.7, 1, 0.7, 0.5, 0.85, 0.6, 0.4, 0.9, 0.55].map((base, i) => {
                   const h = status === "active" ? Math.max(4, (volume * base * 28) + 4) : 4
@@ -210,7 +209,6 @@ export function Hero() {
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(255,0,127,0.07),transparent_70%)]" />
 
-          {/* Float wrapper — bobs faster when speaking */}
           <motion.div
             className="h-full w-full"
             animate={{ y: [0, -14, 0] }}
@@ -227,7 +225,6 @@ export function Hero() {
             />
           </motion.div>
 
-          {/* Pulsing rings — volume-driven scale */}
           {isLive && (
             <motion.div
               className="pointer-events-none absolute inset-0 flex items-center justify-center"

@@ -13,7 +13,8 @@ const LEAVES = [
   { cx: 225, cy: 338, hw: 60, hh: 27, l1: "APPOINTMENT", l2: "SCHEDULING",   branch: "in" },
   { cx: 370, cy: 338, hw: 60, hh: 27, l1: "MEDICATION",  l2: "REFILL",       branch: "in" },
   { cx: 510, cy: 338, hw: 60, hh: 27, l1: "IVR",         l2: "AGENTS",       branch: "in" },
-  { cx: 865, cy: 338, hw: 72, hh: 27, l1: "INSURANCE",   l2: "VERIFICATION", branch: "out" },
+  { cx: 770, cy: 338, hw: 65, hh: 27, l1: "INSURANCE",   l2: "VERIFICATION", branch: "out" },
+  { cx: 960, cy: 338, hw: 65, hh: 27, l1: "REFERRAL",    l2: "VERIFICATION", branch: "out" },
 ]
 
 // ── Pre-computed path data ───────────────────────────────────────────────────
@@ -33,8 +34,13 @@ const PATHS: { d: string; delay: number }[] = [
   { d: `M 225,270 L 225,311`,                          delay: 1.18 },
   { d: `M 370,270 L 370,311`,                          delay: 1.26 },
   { d: `M 510,270 L 510,311`,                          delay: 1.34 },
-  // OUTBOUND → insurance
-  { d: `M 865,215 L 865,311`,                          delay: 0.75 },
+  // OUTBOUND → junction
+  { d: `M 865,215 L 865,270`,                          delay: 0.75 },
+  // Horizontal span across outbound children
+  { d: `M 770,270 L 960,270`,                          delay: 0.95 },
+  // Drops to outbound leaves
+  { d: `M 770,270 L 770,311`,                          delay: 1.1  },
+  { d: `M 960,270 L 960,311`,                          delay: 1.18 },
 ]
 
 // ── Sub-components ───────────────────────────────────────────────────────────
@@ -164,7 +170,7 @@ export function Agents() {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
   return (
-    <section id="agents" className="py-24 px-4 md:px-16">
+    <section id="agents" className="py-16 md:py-28 px-4 md:px-16">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <motion.div
@@ -179,7 +185,7 @@ export function Agents() {
             <span className="font-mono text-xs text-pink-500">AGENT_NETWORK_MAP</span>
           </div>
           <span className="hidden font-mono text-xs text-zinc-700 md:block">
-            05 AGENTS DEPLOYED
+            06 AGENTS DEPLOYED
           </span>
         </motion.div>
 
@@ -265,6 +271,7 @@ export function Agents() {
             </div>
           </div>
         </div>
+
       </div>
     </section>
   )
