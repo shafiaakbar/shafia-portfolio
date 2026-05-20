@@ -73,6 +73,9 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
   useEffect(() => {
     if (!mounted) return;
 
+    let rafId: number;
+    let rafRunning = false;
+
     const tick = () => {
       if (autoRotateRef.current) {
         angleRef.current = (angleRef.current + 0.18) % 360;
@@ -86,11 +89,29 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
           el.style.zIndex = String(p.zIndex);
         });
       }
-      rafRef.current = requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     };
 
-    rafRef.current = requestAnimationFrame(tick);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !rafRunning) {
+          rafRunning = true;
+          rafId = requestAnimationFrame(tick);
+        } else if (!entry.isIntersecting) {
+          rafRunning = false;
+          cancelAnimationFrame(rafId);
+        }
+      },
+      { threshold: 0 }
+    );
+
+    if (containerRef.current) obs.observe(containerRef.current);
+
+    return () => {
+      rafRunning = false;
+      cancelAnimationFrame(rafId);
+      obs.disconnect();
+    };
   }, [mounted, timelineData, RADIUS]);
 
   const getRelatedItems = useCallback((id: number) =>
