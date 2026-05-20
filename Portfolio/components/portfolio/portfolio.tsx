@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Terminal, ArrowUpRight, Menu, X } from "lucide-react"
 import { ConversationProvider } from "@elevenlabs/react"
+import Lenis from "lenis"
+import { getLenis, setLenis } from "@/lib/lenis"
 import { Hero } from "./sections/hero"
 import { StatementSection } from "./sections/statement"
 import { About } from "./sections/about"
@@ -23,7 +25,14 @@ const navLinks = [
 ]
 
 function scrollTo(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
+  const el = document.getElementById(id)
+  if (!el) return
+  const lenis = getLenis()
+  if (lenis) {
+    lenis.scrollTo(el, { offset: 0 })
+  } else {
+    el.scrollIntoView({ behavior: "smooth" })
+  }
 }
 
 export function Portfolio() {
@@ -51,6 +60,28 @@ export function Portfolio() {
 
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
+  // Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      lerp: 0.1,
+      smoothWheel: true,
+    })
+    setLenis(lenis)
+
+    let rafId: number
+    function tick(time: number) {
+      lenis.raf(time)
+      rafId = requestAnimationFrame(tick)
+    }
+    rafId = requestAnimationFrame(tick)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      lenis.destroy()
+      setLenis(null)
+    }
   }, [])
 
   // Highlight active nav link based on scroll position
