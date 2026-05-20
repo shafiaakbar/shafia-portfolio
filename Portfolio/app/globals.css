@@ -182,6 +182,83 @@
   box-shadow: 0 0 8px #ff007f;
 }
 
-html {
-  scroll-behavior: smooth;
+/* scroll-behavior intentionally omitted — JS scrollIntoView handles smooth scroll */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+.animate-float-slow  { animation: float 3.2s ease-in-out infinite; will-change: transform; }
+.animate-float-med   { animation: float 3.8s ease-in-out infinite; will-change: transform; }
+.animate-float-fast  { animation: float 4.4s ease-in-out infinite; will-change: transform; }
+.animate-float-xslow { animation: float 3.5s ease-in-out infinite; will-change: transform; }
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-14px); }
+}
+.hero-float {
+  animation: heroFloat var(--float-dur, 5s) ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes gradient-sweep {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes badge-glitch {
+  0%, 88%, 100% { transform: translateX(0); opacity: 1; filter: none; }
+  89% { transform: translateX(-2px); opacity: 0.6; filter: hue-rotate(60deg); }
+  90% { transform: translateX(2px); opacity: 1; }
+  91% { transform: translateX(-1px); opacity: 0.8; }
+  92% { transform: translateX(0); opacity: 1; filter: none; }
+}
+
+.badge-glitch {
+  animation: badge-glitch 5s ease infinite;
+}
+
+/* ── Flip cards (about section) ─────────────────────────────────── */
+.flip-card-wrapper {
+  cursor: pointer;
+  width: 100%;
+  user-select: none;
+}
+
+.flip-inner {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-front {
+  transform: rotateY(0deg);
+  border: 1px solid rgba(255, 0, 127, 0.3);
+  background: rgba(9, 9, 11, 0.9);
+  box-shadow: 0 0 20px rgba(255, 0, 127, 0.12), 0 0 60px rgba(255, 0, 127, 0.05);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.flip-card-wrapper:hover .flip-card-front {
+  border-color: rgba(255, 0, 127, 0.6);
+  box-shadow: 0 0 30px rgba(255, 0, 127, 0.25), 0 0 80px rgba(255, 0, 127, 0.1);
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+  border: 1px solid rgba(255, 0, 127, 0.5);
+  background: #09090b;
+  box-shadow: 0 0 30px rgba(255, 0, 127, 0.2), 0 0 80px rgba(255, 0, 127, 0.08);
 }

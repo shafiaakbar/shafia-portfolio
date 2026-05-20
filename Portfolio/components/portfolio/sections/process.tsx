@@ -58,7 +58,7 @@ const processData = [
     title: "Deploy",
     date: "Phase 05",
     content:
-      "Production release with monitoring, rollback plan, and handoff documentation. Zero-downtime deployments.",
+      "Production release with monitoring, zero-downtime deployments, and handoff documentation.",
     category: "Release",
     icon: Rocket,
     relatedIds: [4],
@@ -69,7 +69,7 @@ const processData = [
 
 export function Process() {
   return (
-    <section id="process" className="py-8">
+    <section id="process" className="py-16 md:py-28">
       <div className="mx-auto max-w-6xl px-4 md:px-16">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -81,6 +81,7 @@ export function Process() {
           <h2 className="text-2xl text-white">DEPLOY_PROTOCOL</h2>
           <span className="font-mono text-xs text-pink-500">HOW_I_WORK</span>
         </motion.div>
+
       </div>
       <RadialOrbitalTimeline timelineData={processData} />
     </section>
