@@ -69,7 +69,7 @@ function AvatarTilt() {
         }}
       >
         <div className="relative h-80 w-full">
-          <Image src="/avatar.png" alt="Shafia Bahar" fill sizes="256px" className="object-cover object-top" priority />
+          <Image src="/avatar.png" alt="Shafia Bahar" fill sizes="256px" className="object-cover object-top" loading="lazy" />
         </div>
 
         <div className="pointer-events-none absolute inset-0"
@@ -142,8 +142,7 @@ export function Contact() {
           transition={{ duration: 0.5 }}
           className="mb-12 flex items-baseline gap-4 border-b border-zinc-800 pb-4"
         >
-          <h2 className="text-2xl text-white">UPLINK_TERMINAL</h2>
-          <span className="font-mono text-xs text-pink-500">ESTABLISH_CONNECTION</span>
+          <h2 className="text-2xl text-white" style={{ fontFamily: "var(--font-orbitron)" }}>Contact</h2>
         </motion.div>
 
         <div ref={ref} className="grid grid-cols-1 gap-14 md:grid-cols-2 md:gap-16 md:items-center">
