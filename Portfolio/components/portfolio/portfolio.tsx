@@ -64,8 +64,11 @@ export function Portfolio() {
   // Lenis smooth scroll
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.1,
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
+      wheelMultiplier: 1.2,
+      touchMultiplier: 2,
     })
     setLenis(lenis)
 
