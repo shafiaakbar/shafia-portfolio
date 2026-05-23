@@ -14,24 +14,16 @@ export function CustomCursor() {
     const ring = ringRef.current
     if (!dot || !ring) return
 
-    let mx = -100, my = -100
-    let rx = -100, ry = -100
     let visible = false
-    let raf: number
 
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t
-
-    function tick() {
-      rx = lerp(rx, mx, 0.1)
-      ry = lerp(ry, my, 0.1)
-      dot!.style.transform  = `translate3d(${mx - 3}px,${my - 3}px,0)`
-      ring!.style.transform = `translate3d(${rx - 16}px,${ry - 16}px,0)`
-      raf = requestAnimationFrame(tick)
-    }
+    // Ring gets a CSS transition — compositor-driven, unaffected by JS jank
+    ring.style.transition = "transform 0.18s ease-out"
 
     const onMove = (e: MouseEvent) => {
-      mx = e.clientX
-      my = e.clientY
+      // Dot snaps exactly to pointer — no lerp, no RAF delay
+      dot.style.transform  = `translate3d(${e.clientX - 3}px,${e.clientY - 3}px,0)`
+      // Ring follows via CSS transition on the compositor thread
+      ring.style.transform = `translate3d(${e.clientX - 16}px,${e.clientY - 16}px,0)`
       if (!visible) {
         visible = true
         dot.style.opacity  = "1"
@@ -39,12 +31,10 @@ export function CustomCursor() {
       }
     }
 
-    raf = requestAnimationFrame(tick)
     window.addEventListener("mousemove", onMove, { passive: true })
     document.body.style.cursor = "none"
 
     return () => {
-      cancelAnimationFrame(raf)
       window.removeEventListener("mousemove", onMove)
       document.body.style.cursor = ""
     }
