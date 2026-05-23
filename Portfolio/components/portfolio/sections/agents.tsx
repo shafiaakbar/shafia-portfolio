@@ -65,7 +65,7 @@ function RootNode({ isInView }: { isInView: boolean }) {
       transition={{ duration: 0.5, delay: 0 }}
       style={{ transformOrigin: `${cx}px ${cy}px` }}
     >
-      {[[-hw, -hh], [hw - 8, -hh], [-hw, hh - 8], [hw - 8, hh - 8]].map(([ox, oy], i) => (
+      {[[-hw, -hh], [hw, -hh], [-hw, hh], [hw, hh]].map(([ox, oy], i) => (
         <g key={i}>
           <line x1={cx + ox} y1={cy + oy} x2={cx + ox + (ox! < 0 ? 8 : -8)} y2={cy + oy}
             stroke="rgba(255,0,127,0.7)" strokeWidth="1.5" />

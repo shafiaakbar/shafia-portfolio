@@ -76,6 +76,12 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
     let rafId: number;
     let rafRunning = false;
 
+    // Prime GPU layers once before the loop starts
+    timelineData.forEach((item) => {
+      const el = nodeRefs.current[item.id];
+      if (el) el.style.willChange = "transform, opacity";
+    });
+
     const tick = () => {
       if (autoRotateRef.current) {
         angleRef.current = (angleRef.current + 0.18) % 360;

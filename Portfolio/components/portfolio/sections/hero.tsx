@@ -3,11 +3,8 @@
 import { useCallback, useRef } from "react"
 import { motion } from "framer-motion"
 import { SplineScene } from "@/components/ui/splite"
-import { LiquidButton } from "@/components/ui/liquid-glass-button"
-import { Magnetic } from "@/components/ui/magnetic"
 import { ScrambleText } from "@/components/ui/scramble-text"
 import { useElevenLabs } from "@/hooks/use-elevenlabs"
-import { getLenis } from "@/lib/lenis"
 
 const STATUS_LABEL: Record<string, string> = {
   idle: "",
@@ -55,7 +52,7 @@ export function Hero() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(255,0,127,0.07),transparent_70%)]" />
 
         <div
-          className="h-full w-full hero-float"
+          className="h-full w-full hero-float pointer-events-none md:pointer-events-auto"
           style={{ "--float-dur": isSpeaking ? "1.8s" : "5s" } as React.CSSProperties}
         >
           <SplineScene
@@ -96,7 +93,7 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
 
       {/* Bottom bar — text left, buttons right */}
-      <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between px-8 pb-8 md:px-14 md:pb-12">
+      <div className="absolute inset-x-0 bottom-0 z-10 flex items-end px-8 pb-8 pr-36 md:px-14 md:pr-14 md:pb-12">
 
         {/* Left: name + title + voice feedback */}
         <motion.div
@@ -187,27 +184,6 @@ export function Hero() {
           )}
         </motion.div>
 
-        {/* Right: VIEW_PROJECTS */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut", delay: 0.72 }}
-        >
-          <Magnetic>
-            <LiquidButton
-              size="lg"
-              onClick={() => {
-                const el = document.getElementById("agents")
-                if (!el) return
-                const lenis = getLenis()
-                lenis ? lenis.scrollTo(el, { offset: 0 }) : el.scrollIntoView({ behavior: "smooth" })
-              }}
-              className="font-mono tracking-widest text-zinc-300"
-            >
-              VIEW_PROJECTS
-            </LiquidButton>
-          </Magnetic>
-        </motion.div>
       </div>
 
     </section>
