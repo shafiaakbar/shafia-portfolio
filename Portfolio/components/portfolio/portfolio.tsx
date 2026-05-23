@@ -15,6 +15,7 @@ import { Experience } from "./sections/experience"
 import { Contact } from "./sections/contact"
 import { BootScreen } from "@/components/ui/boot-screen"
 import { CustomCursor } from "@/components/ui/custom-cursor"
+import { TalkButton } from "@/components/ui/talk-button"
 
 const navLinks = [
   { label: "ABOUT", href: "about" },
@@ -248,6 +249,8 @@ export function Portfolio() {
       <Contact />
 
     </main>
+    {/* Outside <main> — no overflow/transform ancestor can trap fixed positioning */}
+    <TalkButton />
     </ConversationProvider>
   )
 }
