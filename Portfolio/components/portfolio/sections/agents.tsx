@@ -167,9 +167,6 @@ export function Agents() {
               style={{ willChange: "transform" }}
             >
               <defs>
-                <style>{`
-                  @keyframes agentPulse { 0%,100%{opacity:1} 50%{opacity:0.15} }
-                `}</style>
                 <pattern id="grid-agents" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
                   <circle cx="0" cy="0" r="0.6" fill="rgba(255,0,127,0.08)" />
                 </pattern>

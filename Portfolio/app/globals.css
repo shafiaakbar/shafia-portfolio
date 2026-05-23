@@ -164,6 +164,11 @@
   50%       { opacity: 0; }
 }
 
+@keyframes agentPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.15; }
+}
+
 .neural-body {
   background-color: #000;
   background-image:

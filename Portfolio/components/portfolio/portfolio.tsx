@@ -4,17 +4,20 @@ import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Terminal, ArrowUpRight, Menu, X } from "lucide-react"
 import { ConversationProvider } from "@elevenlabs/react"
+import dynamic from "next/dynamic"
 import Lenis from "lenis"
 import { getLenis, setLenis } from "@/lib/lenis"
 import { Hero } from "./sections/hero"
-import { StatementSection } from "./sections/statement"
-import { About } from "./sections/about"
-import { Agents } from "./sections/agents"
-import { Experience } from "./sections/experience"
-import { Contact } from "./sections/contact"
 import { BootScreen } from "@/components/ui/boot-screen"
 import { CustomCursor } from "@/components/ui/custom-cursor"
 import { TalkButton } from "@/components/ui/talk-button"
+
+// Below-fold sections: split into separate JS chunks, loaded after hero paints
+const StatementSection = dynamic(() => import("./sections/statement").then(m => ({ default: m.StatementSection })), { ssr: false })
+const About            = dynamic(() => import("./sections/about").then(m => ({ default: m.About })),            { ssr: false })
+const Agents           = dynamic(() => import("./sections/agents").then(m => ({ default: m.Agents })),          { ssr: false })
+const Experience       = dynamic(() => import("./sections/experience").then(m => ({ default: m.Experience })),  { ssr: false })
+const Contact          = dynamic(() => import("./sections/contact").then(m => ({ default: m.Contact })),        { ssr: false })
 
 const navLinks = [
   { label: "ABOUT", href: "about" },
