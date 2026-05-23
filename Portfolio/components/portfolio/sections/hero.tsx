@@ -1,9 +1,7 @@
 "use client"
 
-import { useCallback, useRef, useState, useEffect } from "react"
-import { createPortal } from "react-dom"
+import { useCallback, useRef } from "react"
 import { motion } from "framer-motion"
-import { Mic, MicOff, Loader2 } from "lucide-react"
 import { SplineScene } from "@/components/ui/splite"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
 import { Magnetic } from "@/components/ui/magnetic"
@@ -22,8 +20,6 @@ const STATUS_LABEL: Record<string, string> = {
 export function Hero() {
   const splineRef = useRef<any>(null)
   const { status, volume, isSpeaking, errorMsg, toggle } = useElevenLabs()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
 
   const handleSplineLoad = useCallback((spline: any) => {
     splineRef.current = spline
@@ -43,7 +39,6 @@ export function Hero() {
   }
 
   return (
-    <>
     <section id="core" className="relative min-h-screen overflow-hidden">
       {/* Background glow — centered */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -216,41 +211,5 @@ export function Hero() {
       </div>
 
     </section>
-
-    {/* Portal renders directly into document.body — no ancestor can clip or contain it */}
-    {mounted && createPortal(
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, ease: "easeOut", delay: 0.72 }}
-        className="fixed bottom-8 right-8 z-[9999] md:bottom-12 md:right-14 flex flex-col items-end gap-2"
-      >
-        <Magnetic>
-          <LiquidButton
-            size="lg"
-            onClick={handleTalkClick}
-            disabled={status === "connecting" || status === "ending"}
-            className={`font-mono tracking-widest transition-all duration-300 disabled:opacity-60 ${
-              isLive
-                ? "text-pink-300 shadow-[0_0_28px_rgba(255,0,127,0.5)]"
-                : "text-pink-400 shadow-[0_0_18px_rgba(255,0,127,0.25)]"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              {status === "connecting" || status === "ending" ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : status === "active" ? (
-                <MicOff className="h-3.5 w-3.5" />
-              ) : (
-                <Mic className="h-3.5 w-3.5" />
-              )}
-              {status === "active" ? "END_CALL" : status === "connecting" ? "CONNECTING..." : "TALK_TO_ME"}
-            </span>
-          </LiquidButton>
-        </Magnetic>
-      </motion.div>,
-      document.body
-    )}
-  </>
   )
 }
