@@ -24,7 +24,6 @@ const COMMANDS = [
   { id: "core",     label: "Go to Hero",            category: "NAVIGATE", icon: Home,     action: () => scrollTo("core") },
   { id: "agents",   label: "Go to Projects",         category: "NAVIGATE", icon: Radio,    action: () => scrollTo("agents") },
   { id: "logs",     label: "Go to Mission Log",      category: "NAVIGATE", icon: Terminal, action: () => scrollTo("logs") },
-  { id: "process",  label: "Go to Deploy Protocol",  category: "NAVIGATE", icon: Cpu,      action: () => scrollTo("process") },
   { id: "exp",      label: "Go to Experience",       category: "NAVIGATE", icon: Layers,   action: () => scrollTo("experience") },
   { id: "contact",  label: "Go to Contact",          category: "NAVIGATE", icon: User,     action: () => scrollTo("contact") },
   // Actions

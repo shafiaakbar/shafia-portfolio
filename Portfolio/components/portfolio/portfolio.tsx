@@ -10,7 +10,6 @@ import { Hero } from "./sections/hero"
 import { StatementSection } from "./sections/statement"
 import { About } from "./sections/about"
 import { Agents } from "./sections/agents"
-import { Process } from "./sections/process"
 import { Experience } from "./sections/experience"
 import { Contact } from "./sections/contact"
 import { BootScreen } from "@/components/ui/boot-screen"
@@ -20,7 +19,6 @@ import { TalkButton } from "@/components/ui/talk-button"
 const navLinks = [
   { label: "ABOUT", href: "about" },
   { label: "PROJECTS", href: "agents" },
-  { label: "PROCESS", href: "process" },
   { label: "LOGS", href: "logs" },
   { label: "CONTACT", href: "contact" },
 ]
@@ -244,7 +242,6 @@ export function Portfolio() {
       <StatementSection />
       <About />
       <Agents />
-      <Process />
       <Experience />
       <Contact />
 
