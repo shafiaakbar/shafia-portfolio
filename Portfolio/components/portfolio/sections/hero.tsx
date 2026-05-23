@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useRef } from "react"
+import { useCallback, useRef, useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { SplineScene } from "@/components/ui/splite"
 import { ScrambleText } from "@/components/ui/scramble-text"
@@ -15,8 +15,20 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export function Hero() {
-  const splineRef = useRef<any>(null)
+  const splineRef     = useRef<any>(null)
+  const sectionRef    = useRef<HTMLElement>(null)
+  const [heroVisible, setHeroVisible] = useState(true)
   const { status, volume, isSpeaking, errorMsg, toggle } = useElevenLabs()
+
+  // Pause WebGL when hero is off-screen — frees GPU for smooth scrolling
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([entry]) => setHeroVisible(entry.isIntersecting),
+      { threshold: 0 }
+    )
+    if (sectionRef.current) obs.observe(sectionRef.current)
+    return () => obs.disconnect()
+  }, [])
 
   const handleSplineLoad = useCallback((spline: any) => {
     splineRef.current = spline
@@ -36,7 +48,7 @@ export function Hero() {
   }
 
   return (
-    <section id="core" className="relative min-h-screen overflow-hidden">
+    <section id="core" ref={sectionRef} className="relative min-h-screen overflow-hidden">
       {/* Background glow — centered */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-500 opacity-[0.07] blur-[160px]" />
@@ -53,7 +65,10 @@ export function Hero() {
 
         <div
           className="h-full w-full hero-float pointer-events-none md:pointer-events-auto"
-          style={{ "--float-dur": isSpeaking ? "1.8s" : "5s" } as React.CSSProperties}
+          style={{
+            "--float-dur": isSpeaking ? "1.8s" : "5s",
+            visibility: heroVisible ? "visible" : "hidden",
+          } as React.CSSProperties}
         >
           <SplineScene
             scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"

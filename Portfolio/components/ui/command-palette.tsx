@@ -6,17 +6,8 @@ import {
   Search, Home, Cpu, Terminal, Radio, Phone, Mail,
   ExternalLink, ArrowRight, Layers, User,
 } from "lucide-react"
-import { getLenis } from "@/lib/lenis"
-
 function scrollTo(id: string) {
-  const el = document.getElementById(id)
-  if (!el) return
-  const lenis = getLenis()
-  if (lenis) {
-    lenis.scrollTo(el, { offset: 0 })
-  } else {
-    el.scrollIntoView({ behavior: "smooth" })
-  }
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
 }
 
 const COMMANDS = [
