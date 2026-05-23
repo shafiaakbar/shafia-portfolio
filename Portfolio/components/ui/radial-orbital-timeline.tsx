@@ -182,11 +182,10 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
           ref={orbitRef}
           style={{ perspective: "1000px" }}
         >
-          {/* Centre orb */}
+          {/* Centre orb — backdrop-blur removed (expensive paint), one ping kept */}
           <div className={`absolute rounded-full bg-gradient-to-br from-pink-600 via-pink-500 to-fuchsia-600 animate-pulse flex items-center justify-center z-10 shadow-[0_0_30px_rgba(255,0,127,0.5)] ${isMobile ? "w-10 h-10" : "w-16 h-16"}`}>
-            <div className={`absolute rounded-full border border-pink-500/30 animate-ping opacity-60 ${isMobile ? "w-14 h-14" : "w-20 h-20"}`} />
-            <div className={`absolute rounded-full border border-pink-500/15 animate-ping opacity-40 ${isMobile ? "w-18 h-18" : "w-28 h-28"}`} style={{ animationDelay: "0.6s" }} />
-            <div className={`rounded-full bg-white/85 backdrop-blur-md ${isMobile ? "w-4 h-4" : "w-7 h-7"}`} />
+            <div className={`absolute rounded-full border border-pink-500/30 animate-ping opacity-50 ${isMobile ? "w-14 h-14" : "w-20 h-20"}`} />
+            <div className={`rounded-full bg-white ${isMobile ? "w-4 h-4" : "w-7 h-7"}`} />
           </div>
 
           {/* Orbit ring */}

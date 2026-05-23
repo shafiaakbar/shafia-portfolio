@@ -164,7 +164,7 @@ export function Agents() {
             <svg
               viewBox="0 0 1040 400"
               className="w-full"
-              style={{ filter: "drop-shadow(0 0 1px rgba(255,0,127,0.2))" }}
+              style={{ willChange: "transform" }}
             >
               <defs>
                 <style>{`

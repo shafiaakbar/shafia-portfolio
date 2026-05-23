@@ -15,7 +15,6 @@ export function CustomCursor() {
     if (!dot || !ring) return
 
     let mx = -100, my = -100
-    let dx = -100, dy = -100
     let rx = -100, ry = -100
     let visible = false
     let raf: number
@@ -23,11 +22,9 @@ export function CustomCursor() {
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
     function tick() {
-      dx = lerp(dx, mx, 0.28)
-      dy = lerp(dy, my, 0.28)
-      rx = lerp(rx, mx, 0.08)
-      ry = lerp(ry, my, 0.08)
-      dot!.style.transform  = `translate3d(${dx - 3}px,${dy - 3}px,0)`
+      rx = lerp(rx, mx, 0.1)
+      ry = lerp(ry, my, 0.1)
+      dot!.style.transform  = `translate3d(${mx - 3}px,${my - 3}px,0)`
       ring!.style.transform = `translate3d(${rx - 16}px,${ry - 16}px,0)`
       raf = requestAnimationFrame(tick)
     }
