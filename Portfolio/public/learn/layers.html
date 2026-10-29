@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three AIs, One Call</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F2EA; --paper2:#ECE7DB; --ink:#1C1A17; --ink2:#5E5850; --line:#D8D1C2;
+  --hl:#FFD93D;
+  --ear:#3557D4; --brain:#D9522B; --mouth:#23885E; --bad:#D2302C;
+  --pedal-hi:#FFFFFF; --pedal-lo:#E3DDD0; --screen:#1E1D1B; --screen-ink:#F3EFE6;
+  --shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 -2px 0 rgba(0,0,0,.08) inset, 0 14px 30px -12px rgba(40,30,10,.35), 0 2px 4px rgba(40,30,10,.12);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#171614; --paper2:#211F1C; --ink:#F1EDE4; --ink2:#A59E92; --line:#35322D;
+    --ear:#7D97FF; --brain:#FF8A5C; --mouth:#4FC892; --bad:#FF6A63;
+    --pedal-hi:#34312C; --pedal-lo:#25231F; --screen:#0E0D0C; --screen-ink:#F3EFE6;
+    --shadow:0 1px 0 rgba(255,255,255,.08) inset, 0 -2px 0 rgba(0,0,0,.3) inset, 0 14px 30px -12px rgba(0,0,0,.7), 0 2px 4px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#171614; --paper2:#211F1C; --ink:#F1EDE4; --ink2:#A59E92; --line:#35322D;
+  --ear:#7D97FF; --brain:#FF8A5C; --mouth:#4FC892; --bad:#FF6A63;
+  --pedal-hi:#34312C; --pedal-lo:#25231F; --screen:#0E0D0C; --screen-ink:#F3EFE6;
+  --shadow:0 1px 0 rgba(255,255,255,.08) inset, 0 -2px 0 rgba(0,0,0,.3) inset, 0 14px 30px -12px rgba(0,0,0,.7), 0 2px 4px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font:400 18px/1.62 'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:680px;margin:0 auto;padding:0 20px 80px}
+h1,h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;letter-spacing:-.025em;line-height:1.02}
+h2{font-size:clamp(30px,7vw,40px);margin:0 0 14px}
+p{margin:0 0 16px;max-width:60ch}
+b{font-weight:700}
+mark{background:linear-gradient(transparent 52%,var(--hl) 52%,var(--hl) 92%,transparent 92%);color:inherit;padding:0 2px}
+.kick{font:700 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-bottom:14px;display:flex;gap:10px;align-items:center}
+.kick i{display:inline-block;width:22px;height:2px;background:currentColor}
+section{padding:64px 0 0}
+.sep{height:1px;background:var(--line);margin:64px 0 0}
+
+/* hero */
+header{padding:52px 0 8px}
+h1{font-size:clamp(44px,12.5vw,84px);margin:0 0 22px}
+h1 .n{display:inline-block;background:var(--hl);color:#1C1A17;padding:0 .14em;border-radius:.08em;transform:rotate(-3deg)}
+.lede{font-size:20px;line-height:1.5}
+.by{display:flex;align-items:center;gap:12px;font-size:15px;line-height:1.4;color:var(--ink2);margin-top:26px}
+.by .av{width:42px;height:42px;flex:none;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font:800 18px 'Bricolage Grotesque'}
+.by a{color:var(--ink);font-weight:600}
+.mini{display:flex;align-items:center;gap:6px;margin:30px 0 0;flex-wrap:wrap}
+.mini span{font:700 12px 'JetBrains Mono';letter-spacing:.06em;padding:7px 11px;border-radius:8px;color:#fff}
+.mini .a{background:var(--ear)}.mini .b{background:var(--brain)}.mini .c{background:var(--mouth)}
+.mini em{font:500 14px 'JetBrains Mono';font-style:normal;color:var(--ink2)}
+
+/* chooser */
+.choices{display:flex;flex-direction:column;gap:8px;margin:22px 0 14px}
+.choice{appearance:none;text-align:left;font:500 16px/1.35 'Instrument Sans';color:var(--ink);background:var(--paper2);border:1.5px solid transparent;border-radius:12px;padding:13px 14px 13px 42px;position:relative;cursor:pointer}
+.choice::before{content:"";position:absolute;left:14px;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;border:2px solid var(--ink2)}
+.choice[aria-pressed="true"]{border-color:var(--ink);background:var(--pedal-hi)}
+.choice[aria-pressed="true"]::before{border-color:var(--ink);background:radial-gradient(var(--ink) 0 4px,transparent 5px)}
+
+/* fader */
+.fader{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;background:var(--paper2);border-radius:14px;padding:12px 16px;margin-bottom:24px}
+.fader label{font:600 15px 'Instrument Sans'}
+.fader output{font:700 14px 'JetBrains Mono';min-width:42px;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--ink) var(--p,0%),var(--line) var(--p,0%))}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--ink)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:var(--pedal-hi);border:2px solid var(--ink);box-shadow:0 3px 8px rgba(0,0,0,.25)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--pedal-hi);border:2px solid var(--ink)}
+
+/* call button */
+.callrow{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.callbtn{appearance:none;border:0;width:76px;height:76px;flex:none;border-radius:50%;cursor:pointer;background:radial-gradient(circle at 35% 30%,#4ED08F,#1E9A5E 70%);color:#fff;box-shadow:0 10px 22px -8px rgba(30,154,94,.7),0 -3px 0 rgba(0,0,0,.18) inset;display:grid;place-items:center;transition:transform .12s}
+.callbtn:active{transform:scale(.94)}
+.callbtn:disabled{filter:grayscale(.6) opacity(.6);cursor:default}
+.callbtn svg{width:32px;height:32px}
+.callrow p{margin:0;font-size:15px;color:var(--ink2);line-height:1.4}
+.callrow b{color:var(--ink)}
+
+/* pedals */
+.chain{display:flex;flex-direction:column}
+.pedal{--c:var(--ear);position:relative;border-radius:18px;padding:16px 16px 18px;background:linear-gradient(180deg,var(--pedal-hi),var(--pedal-lo));box-shadow:var(--shadow);border-top:6px solid var(--c);transition:transform .3s}
+.pedal.brain{--c:var(--brain)} .pedal.mouth{--c:var(--mouth)}
+.pedal.on{transform:translateY(-2px)}
+.ptop{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.led{width:12px;height:12px;border-radius:50%;background:var(--line);flex:none;transition:background .2s,box-shadow .2s}
+.pedal.on .led{background:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent)}
+.pedal.bad .led{background:var(--bad);box-shadow:0 0 0 4px color-mix(in srgb,var(--bad) 22%,transparent)}
+.pnum{font:700 12px 'JetBrains Mono';letter-spacing:.12em;color:var(--c)}
+.pname{font:800 22px/1 'Bricolage Grotesque';letter-spacing:-.01em}
+.pjob{margin-left:auto;font:700 11px 'JetBrains Mono';letter-spacing:.06em;color:var(--ink2);border:1.5px solid var(--line);border-radius:6px;padding:4px 7px}
+.pdesc{font-size:15px;color:var(--ink2);margin:0 0 12px;line-height:1.4}
+.screen{background:var(--screen);color:var(--screen-ink);border-radius:10px;padding:12px 14px;min-height:60px;font:500 15px/1.5 'JetBrains Mono';box-shadow:0 2px 0 rgba(0,0,0,.4) inset}
+.ph{color:#77716A}
+.screen canvas{display:block;width:100%;height:46px;margin-bottom:6px}
+.w{opacity:0;transition:opacity .15s}.w.in{opacity:1}
+.w.miss{color:#1C1A17;background:#FF8A84;border-radius:3px;padding:0 3px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 14px}
+.kv dt{color:#8F887E}
+.kv dd.miss{color:#FF8A84}
+.ms{position:absolute;right:16px;bottom:-11px;font:700 11px 'JetBrains Mono';background:var(--ink);color:var(--paper);border-radius:20px;padding:3px 9px;opacity:0;transition:opacity .3s}
+.pedal.on .ms,.pedal.bad .ms{opacity:1}
+.hear{appearance:none;margin-top:10px;font:600 14px 'Instrument Sans';border:1.5px solid var(--ink);color:var(--ink);background:transparent;border-radius:30px;padding:7px 14px;cursor:pointer}
+.cable{height:34px;display:flex;justify-content:center;position:relative}
+.cable::before{content:"";width:6px;background:var(--ink);border-radius:3px;opacity:.85}
+.cable .pulse{position:absolute;top:0;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--hl);box-shadow:0 0 0 3px var(--ink);opacity:0}
+.cable.go .pulse{animation:flow .45s ease-in forwards}
+@keyframes flow{0%{top:-4px;opacity:1}100%{top:26px;opacity:1}}
+.total{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:24px 0 0;font:500 13px 'JetBrains Mono';color:var(--ink2)}
+.total b{font:800 26px 'Bricolage Grotesque';color:var(--ink)}
+.result{margin-top:18px;border-left:4px solid var(--ink);padding:4px 0 4px 16px;font-size:17px}
+.result.bad{border-color:var(--bad)}
+
+/* turn game */
+.stage{background:linear-gradient(180deg,var(--pedal-hi),var(--pedal-lo));border-radius:18px;box-shadow:var(--shadow);padding:18px;margin-top:22px}
+.bubble{font:600 21px/1.4 'Instrument Sans';min-height:62px;margin-bottom:16px}
+.bubble .dots{color:var(--ink2);font-style:italic}
+.track{position:relative;height:44px;border-radius:10px;background:repeating-linear-gradient(135deg,var(--paper2) 0 6px,transparent 6px 12px);border:1.5px solid var(--line);overflow:hidden;margin-bottom:8px}
+.blk{position:absolute;top:9px;bottom:9px;border-radius:5px;background:var(--ear)}
+.head{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);left:0;z-index:2}
+.tap{position:absolute;top:0;bottom:0;width:5px;margin-left:-2px;border-radius:2px;background:var(--hl);box-shadow:0 0 0 1.5px #1C1A17;z-index:3}
+.zone{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--mouth) 24%,transparent);border-left:2px dashed var(--mouth)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font:500 12px 'JetBrains Mono';color:var(--ink2);margin-bottom:16px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.btns{display:flex;gap:10px}
+.btn{appearance:none;flex:1;font:700 17px 'Instrument Sans';border-radius:14px;padding:16px;cursor:pointer;border:2px solid var(--ink);background:transparent;color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn:disabled{opacity:.35;cursor:default}
+.verdict{margin:14px 0 0;font-weight:600;min-height:28px}
+
+/* quiz */
+.q{background:var(--paper2);border-radius:16px;padding:18px;margin-top:14px}
+.q p{font-weight:600;margin-bottom:10px}
+.opt{appearance:none;display:block;width:100%;text-align:left;font:500 16px/1.35 'Instrument Sans';color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:8px;cursor:pointer}
+.opt.right{border-color:var(--mouth);box-shadow:0 0 0 1.5px var(--mouth) inset}
+.opt.right::after{content:"  ✓";color:var(--mouth);font-weight:700}
+.opt.wrong{border-color:var(--bad);opacity:.65;text-decoration:line-through}
+#score{margin-top:18px;font:800 22px 'Bricolage Grotesque'}
+
+/* outro */
+.outro{margin-top:64px;background:var(--ink);color:var(--paper);border-radius:22px;padding:30px 24px}
+.outro h2{color:var(--paper)}
+.outro p{opacity:.8}
+.follow{display:inline-block;margin-top:6px;background:var(--hl);color:#1C1A17;font:700 18px 'Instrument Sans';text-decoration:none;border-radius:14px;padding:15px 22px}
+.fine{font-size:13px;color:var(--ink2);margin-top:26px;line-height:1.5}
+
+@media (min-width:720px){
+  main{padding:0 28px 100px}
+  .choices{flex-direction:row}.choice{flex:1}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="kick"><i></i>Voice AI, learned by playing</div>
+  <h1>Every AI phone call is <span class="n">3</span> AIs passing a note.</h1>
+  <p class="lede">One listens, one thinks, one speaks. In five minutes you'll run all three yourself, break them, and see why some AI callers feel human and others don't.</p>
+  <div class="mini" aria-hidden="true"><span class="a">LISTEN</span><em>→</em><span class="b">THINK</span><em>→</em><span class="c">SPEAK</span></div>
+  <div class="by"><div class="av">S</div><div>By <b style="color:var(--ink)">Shafia</b>, founding engineer at Karing AI<br><a href="https://instagram.com/shafiaa.ai">@shafiaa.ai</a></div></div>
+</header>
+
+<div class="sep"></div>
+
+<section aria-labelledby="h1s">
+  <div class="kick"><i></i>Part 1 of 3</div>
+  <h2 id="h1s">Make a call</h2>
+  <p>Here are the three AIs, wired together like guitar pedals. The caller's voice goes into the first one and an answer comes out of the last. Pick a line and press the green button.</p>
+
+  <div class="choices" role="group" aria-label="What the caller says">
+    <button class="choice" aria-pressed="true" data-i="0">“Can I move my appointment to Thursday?”</button>
+    <button class="choice" aria-pressed="false" data-i="1">“What time do you open tomorrow?”</button>
+    <button class="choice" aria-pressed="false" data-i="2">“I need a refill on my prescription.”</button>
+  </div>
+
+  <div class="fader">
+    <label for="noise">Background noise</label>
+    <input id="noise" type="range" min="0" max="100" value="0">
+    <output id="nv" for="noise">0%</output>
+  </div>
+
+  <div class="callrow">
+    <button class="callbtn" id="call" aria-label="Call">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>
+    </button>
+    <p id="hint"><b>Press to call.</b><br>Watch the light travel down the chain.</p>
+  </div>
+
+  <div class="chain">
+    <div class="pedal" id="P1">
+      <div class="ptop"><span class="led"></span><span class="pnum">01</span><span class="pname">Listen</span><span class="pjob">STT</span></div>
+      <p class="pdesc">Speech-to-text. Turns the caller's voice into written words.</p>
+      <div class="screen"><canvas id="wave" width="600" height="92"></canvas><div id="o1"></div></div>
+      <span class="ms">≈ 0.3 s</span>
+    </div>
+    <div class="cable" id="c1"><span class="pulse"></span></div>
+    <div class="pedal brain" id="P2">
+      <div class="ptop"><span class="led"></span><span class="pnum">02</span><span class="pname">Think</span><span class="pjob">LLM</span></div>
+      <p class="pdesc">A language model. It never hears the voice, only the words. It works out what they want and writes a reply.</p>
+      <div class="screen"><dl class="kv" id="o2"></dl></div>
+      <span class="ms">≈ 0.4 s</span>
+    </div>
+    <div class="cable" id="c2"><span class="pulse"></span></div>
+    <div class="pedal mouth" id="P3">
+      <div class="ptop"><span class="led"></span><span class="pnum">03</span><span class="pname">Speak</span><span class="pjob">TTS</span></div>
+      <p class="pdesc">Text-to-speech. Turns the written reply back into a voice.</p>
+      <div class="screen"><div id="o3"></div></div>
+      <button class="hear" id="hear" hidden>▶ Hear it</button>
+      <span class="ms">≈ 0.2 s</span>
+    </div>
+  </div>
+
+  <div class="total" id="total" hidden>caller stops talking → AI starts talking <b>≈ 0.9 s</b></div>
+  <p class="result" id="lesson">Press the green button to start.</p>
+</section>
+
+<div class="sep"></div>
+
+<section aria-labelledby="h2s">
+  <div class="kick"><i></i>Part 2 of 3</div>
+  <h2 id="h2s">Break it on purpose</h2>
+  <p>Drag <b>Background noise</b> above 50% and call again. Watch which pedal goes wrong first, and what happens to the two after it.</p>
+  <p>That chain reaction is called <mark>the cascade</mark>. Pedals 2 and 3 can't hear the caller. They only get the note from pedal 1, so if the note is wrong they do a perfect job with the wrong information. That's why the best fix is usually at the start, in the listener.</p>
+</section>
+
+<div class="sep"></div>
+
+<section aria-labelledby="h3s">
+  <div class="kick"><i></i>Part 3 of 3</div>
+  <h2 id="h3s">When are they done talking?</h2>
+  <p>People pause mid-sentence all the time, and an AI has to decide when to jump in. Your turn: press <b>Start</b>, then tap <b>Reply</b> the moment the caller has finished.</p>
+
+  <div class="stage">
+    <div class="bubble" id="said" aria-live="polite"><span class="dots">Press Start to hear the caller.</span></div>
+    <div class="track" id="track"><span class="head" id="head"></span></div>
+    <div class="legend"><span><i style="background:var(--ear)"></i>talking</span><span><i style="background:repeating-linear-gradient(135deg,var(--line) 0 3px,transparent 3px 6px)"></i>silence</span><span id="lz" hidden><i style="background:color-mix(in srgb,var(--mouth) 40%,transparent)"></i>best time to reply</span></div>
+    <div class="btns"><button class="btn" id="tstart">Start</button><button class="btn primary" id="treply" disabled>Reply</button></div>
+    <p class="verdict" id="verdict"></p>
+  </div>
+
+  <p style="margin-top:24px">See the long gap after “um…”? A simple bot waits for a fixed silence, then talks. That's why bad bots interrupt you. Good agents add a <mark>4th AI for turn detection</mark>: it reads the words and the tone to guess whether the sentence is really finished.</p>
+</section>
+
+<div class="sep"></div>
+
+<section aria-labelledby="hq">
+  <div class="kick"><i></i>Check yourself</div>
+  <h2 id="hq">Did it click?</h2>
+  <div class="q" data-a="1"><p>Which AI turns the reply into a voice?</p>
+    <button class="opt">Listen (STT)</button><button class="opt">Speak (TTS)</button><button class="opt">Think (LLM)</button></div>
+  <div class="q" data-a="0"><p>The listener hears “Tuesday” instead of “Thursday”. What happens?</p>
+    <button class="opt">The thinker and speaker confidently use Tuesday</button><button class="opt">The thinker notices and fixes it</button><button class="opt">The call hangs up</button></div>
+  <div class="q" data-a="2"><p>Why do some AIs cut you off mid-sentence?</p>
+    <button class="opt">The model is too slow</button><button class="opt">The voice is too loud</button><button class="opt">They reply after a fixed silence instead of detecting the turn</button></div>
+  <p id="score" aria-live="polite"></p>
+</section>
+
+<div class="outro">
+  <h2>That's the whole stack.</h2>
+  <p>Next: how to make all three fast enough to feel human. I post one voice AI idea at a time.</p>
+  <a class="follow" href="https://instagram.com/shafiaa.ai">Follow @shafiaa.ai</a>
+</div>
+
+<p class="fine">Made by Shafia, founding engineer at Karing AI, where we build voice agents for healthcare. The demos are simplified simulations that run in your browser. Nothing you do here is recorded or sent anywhere.</p>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduce ? Math.min(ms, 60) : ms));
+
+const CALLS = [
+  {said:'Can I move my appointment to Thursday?', noisy:'Can I move my appointment to Tuesday?', miss:'Tuesday',
+   want:'Move appointment', k:'Day', v:'Thursday', vN:'Tuesday',
+   reply:'Sure. You are moved to Thursday at 10:30.', replyN:'Sure. You are moved to Tuesday at 10:30.'},
+  {said:'What time do you open tomorrow?', noisy:'What time do you close tomorrow?', miss:'close',
+   want:'Opening hours', k:'When', v:'Tomorrow, open', vN:'Tomorrow, close',
+   reply:'We open at 8 tomorrow morning.', replyN:'We close at 5 tomorrow afternoon.'},
+  {said:'I need a refill on my prescription.', noisy:'I need a refund on my prescription.', miss:'refund',
+   want:'Prescription', k:'Action', v:'Refill', vN:'Refund',
+   reply:'I will send a refill request to your doctor now.', replyN:'I can help with a refund. Which charge was it?'}];
+let pick = 0, noise = 0, busy = false, lastReply = '';
+const noisy = () => noise > 50;
+
+document.querySelectorAll('.choice').forEach(b => b.addEventListener('click', () => {
+  if (busy) return;
+  document.querySelectorAll('.choice').forEach(x => x.setAttribute('aria-pressed', x === b));
+  pick = +b.dataset.i; reset();
+}));
+const nz = $('#noise');
+nz.addEventListener('input', () => {
+  noise = +nz.value; nz.style.setProperty('--p', noise + '%'); $('#nv').textContent = noise + '%';
+  if (!busy) reset();
+});
+
+/* waveform in the Listen screen: voice bars plus noise hiss */
+const cv = $('#wave'), cx = cv.getContext('2d');
+let level = 0;
+function draw(t) {
+  const w = cv.width, h = cv.height, bars = 48, bw = w / bars, n = noise / 100;
+  cx.clearRect(0, 0, w, h);
+  for (let i = 0; i < bars; i++) {
+    const voice = level * (0.2 + 0.8 * Math.abs(Math.sin(i * .41 + t * .007) * Math.sin(i * .17 + t * .003)));
+    const hiss = n * .6 * Math.abs(Math.sin(i * 12.9898 + t * .02));
+    const v = Math.max(.05, Math.min(1, voice + hiss)), bh = v * h;
+    cx.fillStyle = hiss > voice && n > .5 ? '#FF8A84' : '#F3EFE6';
+    cx.fillRect(i * bw + 3, h / 2 - bh / 2, bw - 6, bh);
+  }
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+
+function reset() {
+  ['P1', 'P2', 'P3'].forEach(id => $('#' + id).classList.remove('on', 'bad'));
+  ['c1', 'c2'].forEach(id => $('#' + id).classList.remove('go'));
+  $('#o1').innerHTML = '<span class="ph">waiting for sound…</span>';
+  $('#o2').innerHTML = '<span class="ph">waiting for words…</span>';
+  $('#o3').innerHTML = '<span class="ph">waiting for a reply…</span>';
+  $('#hear').hidden = true; $('#total').hidden = true;
+  $('#lesson').className = 'result';
+  $('#lesson').textContent = noisy() ? "It's loud now. Press the green button and watch pedal 1." : 'Press the green button to start.';
+}
+reset();
+async function type(el, text, miss) {
+  el.innerHTML = text.split(' ').map(w => `<span class="w${miss && w.replace(/[?.!,“”"]/g, '') === miss ? ' miss' : ''}">${w}</span>`).join(' ');
+  for (const s of el.querySelectorAll('.w')) { s.classList.add('in'); await wait(95); }
+}
+async function pulse(id) { const c = $('#' + id); c.classList.remove('go'); void c.offsetWidth; c.classList.add('go'); await wait(450); }
+
+$('#call').addEventListener('click', async () => {
+  if (busy) return; busy = true; reset(); $('#call').disabled = true;
+  const c = CALLS[pick], bad = noisy();
+  $('#hint').innerHTML = '<b>Ringing…</b><br>The caller is talking.';
+  $('#P1').classList.add('on'); level = .95; await wait(800);
+  await type($('#o1'), '“' + (bad ? c.noisy : c.said) + '”', bad && c.miss); level = 0;
+  if (bad) $('#P1').classList.replace('on', 'bad');
+  await pulse('c1');
+  $('#P2').classList.add(bad ? 'bad' : 'on');
+  $('#o2').innerHTML = `<dt>Wants</dt><dd>${c.want}</dd><dt>${c.k}</dt><dd${bad ? ' class="miss"' : ''}>${bad ? c.vN : c.v}</dd>`;
+  await wait(800);
+  await pulse('c2');
+  $('#P3').classList.add(bad ? 'bad' : 'on');
+  lastReply = bad ? c.replyN : c.reply;
+  await type($('#o3'), '“' + lastReply + '”');
+  $('#hear').hidden = !('speechSynthesis' in window);
+  $('#total').hidden = false;
+  $('#lesson').className = 'result' + (bad ? ' bad' : '');
+  $('#lesson').innerHTML = bad
+    ? '<b>Pedal 1 misheard one word.</b> Pedals 2 and 3 did their jobs perfectly, with the wrong word. That\'s the cascade.'
+    : '<b>Three AIs, one after another, in under a second.</b> Now drag the noise above 50% and call again.';
+  $('#hint').innerHTML = '<b>Call again</b><br>Try another line, or more noise.';
+  $('#call').disabled = false; busy = false;
+});
+$('#hear').addEventListener('click', () => {
+  try { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance(lastReply)); } catch (e) {}
+});
+
+/* turn-taking game on a visible timeline: [word, ms spoken, ms of silence before it] */
+const SCRIPT = [['I',300,0],['need',220,60],['to',160,40],['move',220,40],['my',160,40],['appointment',380,40],['to…',320,60],['um…',420,900],['Friday',420,700],['please.',360,40]];
+const starts = []; let endAt, total, t0 = 0, timers = [], playing = false, raf;
+(function layout() {
+  let at = 400;
+  SCRIPT.forEach(([, d, g]) => { at += g; starts.push([at, d]); at += d; });
+  endAt = at; total = at + 2200;
+  const tr = $('#track'), z = document.createElement('span');
+  z.className = 'zone'; z.hidden = true;
+  z.style.left = (endAt / total * 100) + '%'; z.style.width = (1200 / total * 100) + '%'; tr.appendChild(z);
+  starts.forEach(([s, d]) => { const b = document.createElement('span'); b.className = 'blk';
+    b.style.left = (s / total * 100) + '%'; b.style.width = (d / total * 100) + '%'; tr.appendChild(b); });
+})();
+function sweep() {
+  const e = performance.now() - t0;
+  $('#head').style.left = Math.min(100, e / total * 100) + '%';
+  if (playing && e < total) raf = requestAnimationFrame(sweep);
+}
+$('#tstart').addEventListener('click', () => {
+  timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf);
+  document.querySelectorAll('.tap').forEach(x => x.remove());
+  $('.zone').hidden = true; $('#lz').hidden = true;
+  $('#said').innerHTML = ''; $('#verdict').textContent = '';
+  $('#treply').disabled = false; $('#tstart').textContent = 'Again';
+  playing = true; t0 = performance.now(); sweep();
+  starts.forEach(([s], i) => timers.push(setTimeout(() => {
+    const w = SCRIPT[i][0];
+    $('#said').insertAdjacentHTML('beforeend', (i ? ' ' : '') + `<span${/…/.test(w) ? ' class="dots"' : ''}>${w}</span>`);
+  }, s)));
+  timers.push(setTimeout(() => { if (playing) judge(null); }, total));
+});
+function judge(e) {
+  playing = false; $('#treply').disabled = true; timers.forEach(clearTimeout); cancelAnimationFrame(raf);
+  $('.zone').hidden = false; $('#lz').hidden = false;
+  const v = $('#verdict');
+  if (e == null) { v.style.color = 'var(--bad)'; v.textContent = 'Too slow. That silence felt like the line dropped.'; return; }
+  const m = document.createElement('span'); m.className = 'tap'; m.style.left = (e / total * 100) + '%'; $('#track').appendChild(m);
+  if (e < endAt) { v.style.color = 'var(--bad)'; v.textContent = e > starts[7][0] - 900 ? 'You jumped in during the “um…”. A silence timer makes this exact mistake.' : 'You cut them off mid-sentence.'; return; }
+  const d = (e - endAt) / 1000;
+  if (d < 1.2) { v.style.color = 'var(--mouth)'; v.textContent = `Nice, ${d.toFixed(1)} s after they finished. You just did turn detection.`; }
+  else { v.style.color = 'var(--brain)'; v.textContent = `A bit slow (${d.toFixed(1)} s). Callers notice gaps over a second.`; }
+}
+$('#treply').addEventListener('click', () => judge(performance.now() - t0));
+
+/* quiz */
+let right = 0, answered = 0;
+document.querySelectorAll('.q').forEach(q => q.querySelectorAll('.opt').forEach((b, i) => b.addEventListener('click', () => {
+  if (q.dataset.done) return; q.dataset.done = 1; answered++;
+  const a = +q.dataset.a; q.querySelectorAll('.opt')[a].classList.add('right');
+  if (i === a) right++; else b.classList.add('wrong');
+  if (answered === 3) $('#score').textContent = right === 3 ? '3 out of 3. You get voice AI now.' : `${right} out of 3. Scroll up and play the call again.`;
+})));
+</script>
+</body>
+</html>
